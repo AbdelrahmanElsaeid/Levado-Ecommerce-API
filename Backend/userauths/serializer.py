@@ -32,7 +32,11 @@ def validate_full_name(value):
     if len(value) < 3:
         raise serializers.ValidationError({'full_name': 'Full name must be at least 3 characters long.'})
     elif len(value) > 30:
-        raise serializers.ValidationError({'full_name': 'Full name cannot be longer than 30 characters.'})
+        #raise serializers.ValidationError({'full_name': 'Full name cannot be longer than 30 characters.'})
+        return Response({'message': 'Full name cannot be longer than 30 characters.'}, status=status.HTTP_400_BAD_REQUEST)
+def validate_email(value):
+    if User.objects.filter(email=value).exists():
+        return Response({'message': 'This email is already in use.'}, status=status.HTTP_400_BAD_REQUEST)
 
     
 class RegisterSerializer(serializers.ModelSerializer):
@@ -43,7 +47,8 @@ class RegisterSerializer(serializers.ModelSerializer):
     def validate_full_name_and_phone(self, attrs):
         full_name = attrs.get('full_name')
         phone = attrs.get('phone')
-
+        email = attrs.get('email')
+        validate_email(email)
         validate_full_name(full_name)
         validate_phone_number(phone)
 
@@ -54,7 +59,9 @@ class RegisterSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         self.validate_full_name_and_phone(attrs)
         if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({'password': 'Password does not match'})
+            raise serializers.ValidationError({'message': 'Password does not match'})
+            #return Response({'Message': 'Password does not match'}, status=status.HTTP_400_BAD_REQUEST)
+
     
         
         
@@ -63,20 +70,24 @@ class RegisterSerializer(serializers.ModelSerializer):
       
 
 
-    def create(self, validated_data):
-       
-        
-        user = User.objects.create(
-            full_name=validated_data['full_name'],
-            email=validated_data['email'],
-            phone=validated_data['phone'], 
-        )  
-        email_user,_ = user.email.split("@")
-        user.username = email_user
-        user.set_password(validated_data['password'])
+    # def create(self, validated_data):
+    #     value=validated_data['email'],
 
-        user.save()
-        return user     
+    #     if User.objects.filter(email=value).exists():
+    #         return Response({'Message': 'This email is already in use.'}, status=status.HTTP_400_BAD_REQUEST)
+       
+    #     else:
+    #         user = User.objects.create(
+    #             full_name=validated_data['full_name'],
+    #             email=validated_data['email'],
+    #             phone=validated_data['phone'], 
+    #         )  
+    #         email_user,_ = user.email.split("@")
+    #         user.username = email_user
+    #         user.set_password(validated_data['password'])
+
+    #         user.save()
+    #         return user     
 
 
 class UserSerializer(serializers.ModelSerializer):

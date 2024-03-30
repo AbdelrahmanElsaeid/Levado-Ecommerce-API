@@ -24,6 +24,31 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer 
 
 
+    def create(self, request, *args, **kwargs):
+        email = request.data.get('email')
+
+        if User.objects.filter(email=email).exists():
+            return Response({'message': 'This email is already in use.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        email = serializer.validated_data['email']
+        user = User.objects.create(
+            full_name=serializer.validated_data['full_name'],
+            email=email,
+            phone=serializer.validated_data['phone'], 
+        )  
+        email_user, _ = email.split("@")
+        user.username = email_user
+        user.set_password(serializer.validated_data['password'])
+        user.save()
+
+
 def generate_otp():
     uuid_key = shortuuid.uuid()
     unique_key = uuid_key[:6]

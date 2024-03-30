@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from store.models import Category,Product,Cart,Tax,CartOrder,CartOrderItem
-from store.serializer import CartSerializer, ProductSerializer,CategorySerializer,CartOrderSerializer
+from store.serializer import CartSerializer, ProductListSerializer,ProductDetailSerializer,CategorySerializer,CartOrderSerializer
 from rest_framework import generics,status
 from rest_framework.permissions import AllowAny 
 from userauths.models import User
@@ -15,16 +15,29 @@ class CategoryListAPIView(generics.ListAPIView):
     serializer_class= CategorySerializer
     permission_classes = [AllowAny]
 
+class ProductCategory(generics.ListAPIView):
+    queryset=Product.objects.all()
+    serializer_class= ProductListSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        name=self.kwargs.get('category')
+        if name:
+            category= Category.objects.get(title=name)
+            queryset = Product.objects.filter(category=category)
+        else: 
+            queryset=Product.objects.all()    
+        return queryset
 
 
 class ProductListAPIView(generics.ListAPIView):
     queryset=Product.objects.all()
-    serializer_class= ProductSerializer
+    serializer_class= ProductListSerializer
     permission_classes = [AllowAny]
 
 
 class ProductDetailAPIView(generics.RetrieveAPIView):
-    serializer_class=ProductSerializer
+    serializer_class=ProductDetailSerializer
     permission_classes=[AllowAny]
 
     def get_object(self):
