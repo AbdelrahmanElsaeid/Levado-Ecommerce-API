@@ -1,9 +1,14 @@
 from rest_framework import serializers
 
 from userauths.serializer import ProfileReviewSerializer, ProfileSerializer
-from .models import Product,Category,Gallery,Specification,Color,Size,Cart,CartOrder,CartOrderItem,Coupon,ProductFaq,Review,Wishlist,Notification
+from .models import Product,Category,Brand,Gallery,Specification,Color,Size,Cart,CartOrder,CartOrderItem,Coupon,ProductFaq,Review,Wishlist,Notification
 from vendor.models import Vendor
 
+
+class BrandSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Brand
+        fields = '__all__'
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,6 +42,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     # size = SizeSerializer(many=True)
     # specification = SpecificationSerializer(many=True)
     category = serializers.StringRelatedField()
+    brand = serializers.StringRelatedField()
 
     
     class Meta:
@@ -51,6 +57,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             "views",
             "rating",
             "category",
+            "brand",
            
             "product_rating",
             "rating_count",
@@ -64,6 +71,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     specification = SpecificationSerializer(many=True)
     vendor =serializers.StringRelatedField()
     category = serializers.StringRelatedField()
+    brand = serializers.StringRelatedField()
     
     class Meta:
         model = Product
@@ -73,6 +81,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             "image",
             "description",
             "category",
+            "brand",
             "price",
             "old_price",
             "shipping_amount",

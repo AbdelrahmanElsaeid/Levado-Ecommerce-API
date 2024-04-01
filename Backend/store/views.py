@@ -1,11 +1,14 @@
 from django.shortcuts import render
-from store.models import Category,Product,Cart,Tax,CartOrder,CartOrderItem,Review
-from store.serializer import CartSerializer, ProductListSerializer,ProductDetailSerializer,CategorySerializer,CartOrderSerializer,ReviewSerializer
+from store.models import Category,Product,Cart,Tax,CartOrder,CartOrderItem,Review,Brand
+from store.serializer import CartSerializer, ProductListSerializer,ProductDetailSerializer,CategorySerializer,CartOrderSerializer,ReviewSerializer,BrandSerializer
 from rest_framework import generics,status
 from rest_framework.permissions import AllowAny 
 from userauths.models import User
 from decimal import Decimal
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
+from .myfilter import ProductFilter
+from .mypagination import ProductPagination
 # Create your views here.
 
 
@@ -15,10 +18,34 @@ class CategoryListAPIView(generics.ListAPIView):
     serializer_class= CategorySerializer
     permission_classes = [AllowAny]
 
+
+class BrandListAPIView(generics.ListAPIView):
+    queryset=Brand.objects.all()
+    serializer_class= BrandSerializer
+    permission_classes = [AllowAny] 
+
+
+class ProductBrandListAPIView(generics.ListAPIView):
+    queryset=Product.objects.all()
+    serializer_class= ProductListSerializer
+    permission_classes = [AllowAny]
+    pagination_class = ProductPagination
+
+    def get_queryset(self):
+        name=self.kwargs.get('brand')
+        if name:
+            brand= Brand.objects.get(title=name)
+            queryset = Product.objects.filter(brand=brand)
+        else: 
+            queryset=Product.objects.all()    
+        return queryset
+
+
 class ProductCategory(generics.ListAPIView):
     queryset=Product.objects.all()
     serializer_class= ProductListSerializer
     permission_classes = [AllowAny]
+    pagination_class = ProductPagination
 
     def get_queryset(self):
         name=self.kwargs.get('category')
@@ -34,6 +61,10 @@ class ProductListAPIView(generics.ListAPIView):
     queryset=Product.objects.all()
     serializer_class= ProductListSerializer
     permission_classes = [AllowAny]
+    pagination_class = ProductPagination
+
+    filterset_class = ProductFilter
+
 
 
 class ProductDetailAPIView(generics.RetrieveAPIView):

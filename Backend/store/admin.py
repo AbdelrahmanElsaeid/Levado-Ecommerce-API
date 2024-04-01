@@ -1,5 +1,5 @@
 from django.contrib import admin
-from store.models import Product,Category, Gallery,Color,Specification,Size, Cart,CartOrder,CartOrderItem,ProductFaq,Review,Coupon,Notification, Wishlist,Tax
+from store.models import Product,Category, Brand,Gallery,Color,Specification,Size, Cart,CartOrder,CartOrderItem,ProductFaq,Review,Coupon,Notification, Wishlist,Tax
 # Register your models here.
 
 class GalleryInline(admin.TabularInline):
@@ -17,7 +17,7 @@ class SizeInline(admin.TabularInline):
     extra=0        
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display=['title','price','category','shipping_amount','stock_qty','in_stock','vendor','featured']
+    list_display=['title','price','category','brand','shipping_amount','stock_qty','in_stock','vendor','featured']
     list_editable=['featured']
     list_filter=['date']
     search_fields=['title']
@@ -28,7 +28,7 @@ class ProductAdmin(admin.ModelAdmin):
 admin.site.register(Product,ProductAdmin)
 admin.site.register(Category)
 
-
+admin.site.register(Brand)
 admin.site.register(Coupon)
 admin.site.register(Cart)
 admin.site.register(CartOrder)

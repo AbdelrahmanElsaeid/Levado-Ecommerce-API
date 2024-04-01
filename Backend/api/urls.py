@@ -12,11 +12,14 @@ urlpatterns = [
 
     # Store Endpoint
     path('category/', store_views.CategoryListAPIView.as_view()),
+    path('brand/', store_views.BrandListAPIView.as_view()),
     path('product/', store_views.ProductListAPIView.as_view()),
     path('product/<slug:slug>/', store_views.ProductDetailAPIView.as_view()),
     path('product/category/<str:category>/',store_views.ProductCategory.as_view()),
     path('reviews/',store_views.ReviewListAPIView.as_view()),
     path('reviews/<product_id>/',store_views.ReviewListAPIView.as_view()),
+
+    path('product/brand/<str:brand>/',store_views.ProductBrandListAPIView.as_view()),
 
 
 
