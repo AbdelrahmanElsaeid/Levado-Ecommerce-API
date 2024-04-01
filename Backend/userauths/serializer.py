@@ -109,3 +109,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         response =  super().to_representation(instance) 
         response['user'] = UserSerializer(instance.user).data
         return response   
+    
+
+
+class ProfileReviewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Profile
+        fields = ['id','full_name', 'image']

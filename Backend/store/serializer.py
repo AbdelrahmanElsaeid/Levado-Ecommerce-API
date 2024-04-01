@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from userauths.serializer import ProfileReviewSerializer, ProfileSerializer
 from .models import Product,Category,Gallery,Specification,Color,Size,Cart,CartOrder,CartOrderItem,Coupon,ProductFaq,Review,Wishlist,Notification
 from vendor.models import Vendor
 
@@ -17,7 +19,7 @@ class GallerySerializer(serializers.ModelSerializer):
 class SpecificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Specification
-        fields = '__all__'
+        fields = ['id','title','content']
 
 class SizeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -174,9 +176,10 @@ class VendorSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     
+    profile = ProfileReviewSerializer()
     class Meta:
         model = Review
-        fields = '__all__'
+        fields = ['id','profile','review','rating','date' ]
 
     def __init__(self, *args, **kwargs):
         super(ReviewSerializer, self).__init__(*args, **kwargs)
