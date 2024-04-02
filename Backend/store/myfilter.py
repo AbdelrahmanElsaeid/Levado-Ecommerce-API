@@ -10,5 +10,6 @@ class ProductFilter(filters.FilterSet):
         fields = {
             "title": ["icontains"],
             "category": ["exact"],
+            "brand": ["exact"],
             "price": ["lte", "gte", "range"],
         }
