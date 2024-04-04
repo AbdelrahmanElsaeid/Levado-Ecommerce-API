@@ -3,7 +3,7 @@ from django_filters import rest_framework as filters
 
 
 class ProductFilter(filters.FilterSet):
-    color = filters.CharFilter(field_name='color__name', lookup_expr='exact')
+    color = filters.CharFilter(field_name='color_product__name', lookup_expr='exact')
 
     class Meta:
         model = Product
