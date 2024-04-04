@@ -294,6 +294,11 @@ class CartItemDeleteAPIView(generics.DestroyAPIView):
 
         return cart
     
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response({'message': 'Item deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
+    
 
 
 class CreateOrderAPIView(generics.CreateAPIView):

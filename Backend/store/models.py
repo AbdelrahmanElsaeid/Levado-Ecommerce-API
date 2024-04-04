@@ -53,14 +53,18 @@ class Product(models.Model):
     rating = models.PositiveIntegerField(default=0,null=True, blank=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
     pid = ShortUUIDField(unique=True, length=10, alphabet="abcdefg123456")
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True,null=True,blank=True)
     date = models.DateTimeField(auto_now_add=True)
 
-    def save(self,*args, **kwargs):
-        if self.slug == "" or self.slug== None:
-            self.slug =slugify(self.title)
+    # def save(self,*args, **kwargs):
+    #     if self.slug == "" or self.slug== None:
+    #         self.slug =slugify(self.title)
 
-        super(Product, self).save(*args, **kwargs) 
+    #     super(Product, self).save(*args, **kwargs) 
+
+    def save(self,*args, **kwargs):
+        self.slug = slugify(self.title)
+        super(Product,self).save(*args,**kwargs)
 
     def __str__(self):
         return self.title
@@ -82,6 +86,8 @@ class Product(models.Model):
         return Size.objects.filter(product=self)
     
     def save(self,*args, **kwargs):
+        if self.slug == "" or self.slug== None:
+            self.slug =slugify(self.title)
         self.rating = self.product_rating()
         super(Product, self).save(*args, **kwargs)
 
@@ -111,7 +117,7 @@ class Specification(models.Model):
 
 
 class Size(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product,related_name="size_product", on_delete=models.CASCADE)
     name = models.CharField(max_length=1000)
     price = models.DecimalField(decimal_places=2, max_digits=12, default=0.00)
     date=models.DateTimeField(auto_now_add=True)
@@ -122,7 +128,7 @@ class Size(models.Model):
    
 
 class Color(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product,related_name="color_product", on_delete=models.CASCADE)
     name = models.CharField(max_length=1000)
     color_code = models.CharField(max_length=1000)
 

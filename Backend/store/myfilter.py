@@ -11,5 +11,6 @@ class ProductFilter(filters.FilterSet):
             "title": ["icontains"],
             "category": ["exact"],
             "brand": ["exact"],
+            "rating": ["exact"],
             "price": ["lte", "gte", "range"],
         }
