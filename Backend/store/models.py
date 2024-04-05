@@ -62,9 +62,9 @@ class Product(models.Model):
 
     #     super(Product, self).save(*args, **kwargs) 
 
-    def save(self,*args, **kwargs):
-        self.slug = slugify(self.title)
-        super(Product,self).save(*args,**kwargs)
+    # def save(self,*args, **kwargs):
+    #     self.slug = slugify(self.title)
+    #     super(Product,self).save(*args,**kwargs)
 
     def __str__(self):
         return self.title
@@ -86,8 +86,8 @@ class Product(models.Model):
         return Size.objects.filter(product=self)
     
     def save(self,*args, **kwargs):
-        if self.slug == "" or self.slug== None:
-            self.slug =slugify(self.title)
+        #if self.slug == "" or self.slug== None:
+        self.slug =slugify(self.title)
         self.rating = self.product_rating()
         super(Product, self).save(*args, **kwargs)
 
