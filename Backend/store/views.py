@@ -10,6 +10,72 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .myfilter import ProductFilter
 from .mypagination import ProductPagination
 # Create your views here.
+from django.db.models import Q
+class Fpro(generics.ListAPIView):
+
+    serializer_class = ProductListSerializer
+    permission_classes = [AllowAny]
+    pagination_class = ProductPagination
+
+    def get_queryset(self):
+        queryset = Product.objects.all()
+      
+
+        brand_ids_str = self.request.query_params.get('brand_ids')
+        category_ids_str = self.request.query_params.get('category_ids')
+        prices_str = self.request.query_params.get('price')
+        rating_str = self.request.query_params.get('rating')
+
+        brand_ids = []
+        category_ids = []
+        prices = []
+        min_price = None
+        max_price = None
+        rating = None
+
+        if brand_ids_str:
+            if brand_ids_str != '[]':
+                brand_ids = [int(id) for id in brand_ids_str.strip('[]').split(',')]
+        
+        if category_ids_str:
+            if category_ids_str != '[]':
+                category_ids = [int(id) for id in category_ids_str.strip('[]').split(',')]
+
+        if prices_str:
+            if prices_str != '[]':
+                prices = [float(price) for price in prices_str.strip('[]').split(',')]
+                min_price, max_price = prices[0], prices[1] if len(prices) > 1 else None 
+
+        if rating_str:  
+            if rating_str != '[]':  
+                rating_values = [int(rating) for rating in rating_str.strip('[]').split(',')]
+                rating = rating_values[0]
+
+
+        if brand_ids:
+            queryset = queryset.filter(brand__id__in=brand_ids)
+
+        if category_ids:
+            queryset = queryset.filter(category__id__in=category_ids)
+
+        if min_price is not None and max_price is not None:
+            queryset = queryset.filter(price__range=(min_price, max_price))
+        if rating is not None:
+            queryset = queryset.filter(rating__gte=rating)            
+
+        return queryset
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

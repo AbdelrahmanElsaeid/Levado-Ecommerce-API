@@ -11,6 +11,10 @@ urlpatterns = [
     path('user/password-change/', userauths_views.PasswordChangeView.as_view()),
 
     # Store Endpoint
+    path('productss/', store_views.Fpro.as_view()),
+
+
+
     path('category/', store_views.CategoryListAPIView.as_view()),
     path('brand/', store_views.BrandListAPIView.as_view()),
     path('product/', store_views.ProductListAPIView.as_view()),
