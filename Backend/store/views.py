@@ -11,6 +11,8 @@ from .myfilter import ProductFilter
 from .mypagination import ProductPagination
 # Create your views here.
 from django.db.models import Q
+
+
 class Fpro(generics.ListAPIView):
 
     serializer_class = ProductListSerializer
@@ -25,6 +27,9 @@ class Fpro(generics.ListAPIView):
         category_ids_str = self.request.query_params.get('category_ids')
         prices_str = self.request.query_params.get('price')
         rating_str = self.request.query_params.get('rating')
+        title_query = self.request.query_params.get('title')
+
+        
 
         brand_ids = []
         category_ids = []
@@ -46,10 +51,19 @@ class Fpro(generics.ListAPIView):
                 prices = [float(price) for price in prices_str.strip('[]').split(',')]
                 min_price, max_price = prices[0], prices[1] if len(prices) > 1 else None 
 
+        # if rating_str:  
+        #     if rating_str != '[]':  
+        #         rating_values = [int(rating) for rating in rating_str.strip('[]').split(',')]
+        #         rating = rating_values[0]
+
         if rating_str:  
-            if rating_str != '[]':  
-                rating_values = [int(rating) for rating in rating_str.strip('[]').split(',')]
-                rating = rating_values[0]
+            if rating_str != '':  
+                rating = int(rating_str)
+        
+
+        #-------------------filter---------------
+
+        #print(f"rating-------{rating}")
 
 
         if brand_ids:
@@ -60,8 +74,12 @@ class Fpro(generics.ListAPIView):
 
         if min_price is not None and max_price is not None:
             queryset = queryset.filter(price__range=(min_price, max_price))
+
         if rating is not None:
-            queryset = queryset.filter(rating__gte=rating)            
+            queryset = queryset.filter(rating__gte=rating)
+
+        if title_query:
+            queryset = queryset.filter(title__icontains=title_query)                
 
         return queryset
 
