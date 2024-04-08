@@ -22,6 +22,8 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             token['vendor_id'] = 0
 
         return token 
+    
+    
 
 
 def validate_phone_number(value):

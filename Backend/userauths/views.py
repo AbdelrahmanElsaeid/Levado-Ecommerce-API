@@ -15,6 +15,23 @@ import shortuuid
 class MyTokenOptainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.user
+        tokens = serializer.validated_data
+        response_data = {
+            'tokens': tokens,
+            'user': {
+                'id': user.id,
+                'full_name': user.full_name,
+                'email': user.email,
+                'username': user.username,
+                # Add more user information as needed
+            }
+        }
+        return Response(response_data)
+
 
 
     
