@@ -1,6 +1,6 @@
-from django.shortcuts import render
-from store.models import Category,Product,Cart,Tax,CartOrder,CartOrderItem,Review,Brand
-from store.serializer import CartSerializer, ProductListSerializer,ProductDetailSerializer,CategorySerializer,CartOrderSerializer,ReviewSerializer,BrandSerializer
+from django.shortcuts import render,redirect
+from store.models import Category,Product,Cart,Tax,CartOrder,CartOrderItem,Review,Brand,Notification,Coupon
+from store.serializer import CartSerializer, ProductListSerializer,ProductDetailSerializer,CategorySerializer,CartOrderSerializer,ReviewSerializer,BrandSerializer,CouponSerializer
 from rest_framework import generics,status
 from rest_framework.permissions import AllowAny 
 from userauths.models import User
@@ -9,8 +9,21 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from .myfilter import ProductFilter
 from .mypagination import ProductPagination
-# Create your views here.
+import stripe
+from django.conf import settings
 from django.db.models import Q
+
+# Create your views here.
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+def send_notification(user=None, vendor=None, order=None, order_item=None):
+    Notification.objects.create(
+        user=user,
+        vendor=vendor,
+        order=order,
+        order_item=order_item
+    )
 
 
 class Fpro(generics.ListAPIView):
@@ -486,3 +499,162 @@ class CheckoutView(generics.RetrieveAPIView):
         order_oid = self.kwargs['order_oid']
         order = CartOrder.objects.get(oid=order_oid)
         return order
+    
+
+
+
+
+
+######################################################
+
+
+
+class CouponAPIView(generics.CreateAPIView):
+    serializer_class= CouponSerializer
+    queryset = Coupon.objects.all()
+    permission_classes = [AllowAny,]
+
+
+
+
+    def create(self,request):
+        payload = request.data
+
+        order_oid = payload['order_oid']
+        coupon_code = payload['coupon_code']
+
+
+        order = CartOrder.objects.get(oid=order_oid)
+        coupon = Coupon.objects.filter(code=coupon_code).first()
+
+        if coupon:
+            order_items = CartOrderItem.objects.filter(order=order, vendor=coupon.vendor)
+
+            if order_items:
+                for i in order_items:
+                    if not coupon in i.coupon.all():
+                        discount = i.total * coupon.discount / 100
+
+                        i.total -= discount
+                        i.sub_total -= discount
+                        i.coupon.add(coupon)
+                        i.saved += discount
+
+                        order.total -= discount
+                        order.sub_total -= discount
+                        order.saved -= discount
+
+                        i.save()
+                        order.save()
+
+                        return Response({"message":"Coupon Activated", "icon":"success"}, status=status.HTTP_200_OK)
+                    else:
+                        return Response({"message":"Coupon Already Activated", "icon":"warning"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"message":"Order Item Does Not Exists", "icon":"error"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"message":"Coupon Does Not Exists", "icon":"error"}, status=status.HTTP_200_OK)
+    
+
+
+
+class StripeCheckoutView(generics.CreateAPIView):
+    serializer_class =CartOrderSerializer
+    queryset = CartOrder.objects.all()
+    permission_classes = [AllowAny,]
+
+
+
+    def create(self,*args, **kwargs):
+        order_oid = self.kwargs['order_oid']
+        cart_id = self.kwargs['cart_id']
+
+        print(f"cart id is----------{cart_id}")
+        order = CartOrder.objects.get(oid=order_oid)
+
+        carts = Cart.objects.filter(cart_id=cart_id)
+
+        print(f"carts  is----------{carts}")
+
+
+        if not order:
+            return Response({"message":"Order Not Found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        try:
+            checkout_session =stripe.checkout.Session.create(
+                customer_email = order.email,
+                payment_method_types=['card'],
+                line_items=[
+                    {
+                        'price_data':{
+                            'currency':'usd',
+                            'product_data':{
+                                'name':order.full_name,
+                            },
+                            'unit_amount': int(order.total * 100)
+                        },
+                        'quantity':1,
+                    }
+                ],
+                mode='payment',
+                success_url ='http://localhost:5173/payment-success/' + order.oid + '?session_id={CHECKOUT_SESSION_ID}',
+                cancel_url ='http://localhost:5173/payment-failed/?session_id={CHECKOUT_SESSION_ID'
+
+            )
+
+            order.stripe_session_id = checkout_session.stripe_id
+            order.save()
+            carts.delete()
+
+            return redirect(checkout_session.url)
+        except stripe.error.StripeError as e:
+            return Response({"error": f"Something went wrong while creating the checkout session: {str(e)}"})
+
+
+class PaymentSuccessView(generics.CreateAPIView):
+    serializer_class =CartOrderSerializer
+    queryset = CartOrder.objects.all()
+    permission_classes = [AllowAny,]
+
+
+    def create(self, request, *args, **kwargs):
+        payload = request.data
+
+        order_oid =payload['order_oid']
+        session_id = payload['session_id']
+
+        order = CartOrder.objects.get(oid=order_oid)
+
+        order_items = CartOrderItem.objects.filter(order=order)
+
+        if session_id != 'null':
+            session = stripe.checkout.Session.retrieve(session_id)
+
+            if session.payment_status == "paid":
+                if order.payment_status == "pending":
+                    order.payment_status = "paid"
+                    order.save()
+
+                    #send notification to customers
+                    if order.buyer != None:
+                        send_notification(user=order.buyer, order=order)
+
+                    #send notification to vendor
+                    for o in order_items:
+                        send_notification(vendor=o.vendor, order=order, order_item=o)    
+    
+                   
+                    return Response({"message":"Payment Successfull"})
+                else:
+                    return Response({"message":"Already Paid"})
+
+            elif session.payment_status == "unpaid":
+                return Response({"message":"Your Invoice is Unpaid"}) 
+            elif session.payment_status == "cancelled":
+                return Response({"message":"Your Invoice was canceled"})
+            else:
+                return Response({"message":"An Error Occured, Try Again..."})
+        else:
+            session = None     
+
+

@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 
 from django.conf import settings
+from environs import Env
+
+env =Env()
+env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -201,3 +205,12 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     #'PAGE_SIZE': 2
 }
+
+
+
+# STRIPE_PUBLIC_KEY = env("STRIPE_PUBLIC_KEY")
+# STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
+
+
+STRIPE_PUBLIC_KEY="pk_test_51NREMBEsOc8lzOUUf8iyrVc2y0Bl6xLRh35xbKVVvTLC30qNHuE5ppdCAA1zMdgQhfV2CuZ6xwFNDESd7lVoYHaU00IDfPW6Df"
+STRIPE_SECRET_KEY="sk_test_51NREMBEsOc8lzOUUiDDjXPZjN4x9qDKdAq58aT6VjUz23kl1VyLWHpfeCJmYxEE7k5kdxRGDd4BSbmbdRk1ZeIS000uMyfyf1c"

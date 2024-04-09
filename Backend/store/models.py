@@ -203,6 +203,8 @@ class CartOrder(models.Model):
     state = models.CharField(max_length=1000, null=True, blank=True)
     country = models.CharField(max_length=1000, null=True, blank=True)
 
+    stripe_session_id = models.CharField(max_length=1000, null=True, blank=True)
+
     
     oid = ShortUUIDField(length=10, max_length=25, alphabet="abcdefghijklmnopqrstuvxyz")
     date = models.DateTimeField(default=timezone.now)
@@ -213,6 +215,9 @@ class CartOrder(models.Model):
 
     def __str__(self):
         return self.oid
+    
+    def orderitem(self):
+        return CartOrderItem.objects.filter(order=self)
 
 
 
