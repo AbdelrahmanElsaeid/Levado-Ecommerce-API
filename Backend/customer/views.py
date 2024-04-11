@@ -37,37 +37,47 @@ class OrderDetailAPIView(generics.RetrieveAPIView):
     
 
 
+class WishlistCreateAPIView(generics.CreateAPIView):
+    serializer_class = WishlistSerializer
+    permission_classes = (AllowAny, )
 
-class WishListAPIView(generics.ListCreateAPIView):
-    serializer_class=WishlistSerializer
-    permission_classes=[AllowAny,]
+    def create(self, request):
+        payload = request.data 
+
+        product_id = payload['product_id']
+        user_id = payload['user_id']
+
+        try:
+            product = Product.objects.get(id=product_id)
+            user = User.objects.get(id=user_id)
+        except (Product.DoesNotExist, User.DoesNotExist):
+            return Response({"message": "User or Product does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+        wishlist_exists = Wishlist.objects.filter(product=product, user=user).exists()
+        if wishlist_exists:
+            Wishlist.objects.filter(product=product, user=user).delete()
+            user_wishlist = Wishlist.objects.filter(user=user)
+            serialized_wishlist = self.serializer_class(user_wishlist, many=True).data
+            return Response({"message": "Removed From Wishlist", "wishlist": serialized_wishlist}, status=status.HTTP_200_OK)
+        else:
+            wishlist = Wishlist.objects.create(product=product, user=user)
+            user_wishlist = Wishlist.objects.filter(user=user)
+            serialized_wishlist = self.serializer_class(user_wishlist, many=True).data
+            return Response({"message": "Added To Wishlist", "wishlist": serialized_wishlist}, status=status.HTTP_201_CREATED)
+
+    
+
+class WishlistAPIView(generics.ListAPIView):
+    serializer_class = WishlistSerializer
+    permission_classes = (AllowAny, )
 
     def get_queryset(self):
         user_id = self.kwargs['user_id']
         user = User.objects.get(id=user_id)
-
-        wishlist = Wishlist.objects.filter(user=user)
-
+        wishlist = Wishlist.objects.filter(user=user,)
         return wishlist
     
-    def create(self,request,*args, **kwargs):
-        payload=request.data
 
-        user_id = payload['user_id']
-        product_id = payload['product_id']
-
-        user = User.objects.get(id=user_id)
-
-        product = Product.objects.get(id=product_id)
-
-        wishlist = Wishlist.objects.filter(user=user, product=product)
-
-        if wishlist:
-            wishlist.delete()
-            return Response({'message': "Wishlist deleted successfully"}, status=status.HTTP_200_OK)
-        else:
-            Wishlist.objects.create(product=product, user=user)
-            return Response({'message':"added to wishlist"}, status=status.HTTP_200_OK)
 
 
 
