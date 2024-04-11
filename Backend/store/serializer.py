@@ -216,6 +216,23 @@ class WishlistSerializer(serializers.ModelSerializer):
     #         self.Meta.depth = 3
 
 
+class WishlistListSerializer(serializers.ModelSerializer):
+    # product = serializers.StringRelatedField()
+    user = serializers.StringRelatedField()
+
+    class Meta:
+        model = Wishlist
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(WishlistListSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request and request.method == 'POST':
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
+
+
 
 class CouponSerializer(serializers.ModelSerializer):
 

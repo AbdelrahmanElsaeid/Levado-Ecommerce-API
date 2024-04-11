@@ -1,7 +1,7 @@
 
 from django.shortcuts import render,redirect
 from store.models import Category,Product,Cart,Tax,CartOrder,CartOrderItem,Coupon,Notification,Review,Wishlist
-from store.serializer import CartSerializer, ProductDetailSerializer,CategorySerializer,CartOrderSerializer,CouponSerializer,NotificationSerializer,ReviewSerializer,WishlistSerializer
+from store.serializer import CartSerializer, ProductDetailSerializer,CategorySerializer,CartOrderSerializer,WishlistListSerializer,NotificationSerializer,ReviewSerializer,WishlistSerializer
 from rest_framework import generics,status
 from rest_framework.permissions import AllowAny 
 from userauths.models import User
@@ -68,7 +68,7 @@ class WishlistCreateAPIView(generics.CreateAPIView):
     
 
 class WishlistAPIView(generics.ListAPIView):
-    serializer_class = WishlistSerializer
+    serializer_class = WishlistListSerializer
     permission_classes = (AllowAny, )
 
     def get_queryset(self):
