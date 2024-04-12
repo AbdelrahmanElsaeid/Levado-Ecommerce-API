@@ -68,6 +68,8 @@ class OrderDetailAPIView(generics.RetrieveAPIView):
 #             user_wishlist = Wishlist.objects.filter(user=user)
 #             serialized_wishlist = self.serializer_class(user_wishlist, many=True).data
 #             return Response({"message": "Added To Wishlist", "wishlist": serialized_wishlist, "data": serialized_wishlist_data}, status=status.HTTP_201_CREATED)
+
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 class WishlistCreateAPIView(generics.CreateAPIView):
     serializer_class = WishlistListSerializer
@@ -77,9 +79,18 @@ class WishlistCreateAPIView(generics.CreateAPIView):
         user_wishlist = Wishlist.objects.filter(user=user)
         return list(user_wishlist.values_list('product_id', flat=True))
     
-    def get_user_wishlist_product(self, user):
-        user_wishlist = Wishlist.objects.filter(user=user)
-        return user_wishlist
+    def get_complete_image_url(self, image_path):
+        # Assuming BASE_URL is defined in your Django settings
+        if isinstance(settings.BASE_URL, tuple):
+            # Convert tuple to string
+            base_url = ''.join(settings.BASE_URL)
+        else:
+            base_url = settings.BASE_URL
+        return base_url + image_path
+    
+    # def get_user_wishlist_product(self, user):
+    #     user_wishlist = Wishlist.objects.filter(user=user)
+    #     return user_wishlist
 
     def create(self, request):
         payload = request.data 
@@ -91,6 +102,8 @@ class WishlistCreateAPIView(generics.CreateAPIView):
 
         user = get_object_or_404(User, id=user_id)
         product = get_object_or_404(Product, id=product_id)
+        user_wishlist = Wishlist.objects.filter(user=user)
+
 
         wishlist_exists = Wishlist.objects.filter(product=product, user=user).exists()
 
@@ -103,9 +116,16 @@ class WishlistCreateAPIView(generics.CreateAPIView):
 
         wishlist_product_ids = self.get_user_wishlist_product_ids(user)
 
-        wishlist_data = self.get_user_wishlist_product(user)
+        #wishlist_data = self.get_user_wishlist_product(user)
 
-        serialized_wishlist = self.serializer_class(wishlist_data, many=True).data
+        #serialized_wishlist = self.serializer_class(user_wishlist, many=True).data
+
+        serialized_wishlist = WishlistListSerializer(user_wishlist, many=True).data
+
+        for item in serialized_wishlist:
+            item['product']['image'] = self.get_complete_image_url(item['product']['image'])
+
+
 
 
         
