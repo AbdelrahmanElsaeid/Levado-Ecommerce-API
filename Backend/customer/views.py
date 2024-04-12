@@ -97,40 +97,47 @@ class WishlistCreateAPIView(generics.CreateAPIView):
         product_id = payload.get('product_id')
         user_id = payload.get('user_id')
 
-        if not product_id or not user_id:
-            return Response({"message": "Product ID and User ID are required"}, status=status.HTTP_400_BAD_REQUEST)
+        if  product_id is not None:
 
-        user = get_object_or_404(User, id=user_id)
-        product = get_object_or_404(Product, id=product_id)
-        user_wishlist = Wishlist.objects.filter(user=user)
-
-
-        wishlist_exists = Wishlist.objects.filter(product=product, user=user).exists()
-
-        if wishlist_exists:
-            Wishlist.objects.filter(product=product, user=user).delete()
-            message = "Removed From Wishlist"
-        else:
-            Wishlist.objects.create(product=product, user=user)
-            message = "Added To Wishlist"
-
-        wishlist_product_ids = self.get_user_wishlist_product_ids(user)
-
-        #wishlist_data = self.get_user_wishlist_product(user)
-
-        #serialized_wishlist = self.serializer_class(user_wishlist, many=True).data
-
-        serialized_wishlist = WishlistListSerializer(user_wishlist, many=True).data
-
-        for item in serialized_wishlist:
-            item['product']['image'] = self.get_complete_image_url(item['product']['image'])
+            user = get_object_or_404(User, id=user_id)
+            product = get_object_or_404(Product, id=product_id)
+            user_wishlist = Wishlist.objects.filter(user=user)
 
 
+            wishlist_exists = Wishlist.objects.filter(product=product, user=user).exists()
 
+            if wishlist_exists:
+                Wishlist.objects.filter(product=product, user=user).delete()
+                message = "Removed From Wishlist"
+            else:
+                Wishlist.objects.create(product=product, user=user)
+                message = "Added To Wishlist"
 
+            wishlist_product_ids = self.get_user_wishlist_product_ids(user)
+
+            #wishlist_data = self.get_user_wishlist_product(user)
+
+            #serialized_wishlist = self.serializer_class(user_wishlist, many=True).data
+
+            serialized_wishlist = WishlistListSerializer(user_wishlist, many=True).data
+
+            for item in serialized_wishlist:
+                item['product']['image'] = self.get_complete_image_url(item['product']['image'])
+            
+
+            return Response({"message": message, "wishlist": wishlist_product_ids, "data": serialized_wishlist}, status=status.HTTP_200_OK if wishlist_exists else status.HTTP_201_CREATED)
         
+        else:
+            user = get_object_or_404(User, id=user_id)
+            user_wishlist = Wishlist.objects.filter(user=user)
+            wishlist_product_ids = self.get_user_wishlist_product_ids(user)
 
-        return Response({"message": message, "wishlist": wishlist_product_ids, "data": serialized_wishlist}, status=status.HTTP_200_OK if wishlist_exists else status.HTTP_201_CREATED)
+            serialized_wishlist = WishlistListSerializer(user_wishlist, many=True).data
+
+            for item in serialized_wishlist:
+                item['product']['image'] = self.get_complete_image_url(item['product']['image'])
+            return Response({"message": "Get Wishlist", "wishlist": wishlist_product_ids, "data": serialized_wishlist}, status=status.HTTP_200_OK )
+
 
 
 
