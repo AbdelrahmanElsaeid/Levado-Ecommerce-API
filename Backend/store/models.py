@@ -204,6 +204,7 @@ class CartOrder(models.Model):
     country = models.CharField(max_length=1000, null=True, blank=True)
 
     stripe_session_id = models.CharField(max_length=1000, null=True, blank=True)
+    cart_order_id = models.CharField(max_length=1000, null=True, blank=True)
 
     
     oid = ShortUUIDField(length=10, max_length=25, alphabet="abcdefghijklmnopqrstuvxyz")
@@ -241,7 +242,7 @@ class CartOrderItem(models.Model):
     initial_total = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, help_text="Grand Total of all amount listed above before discount")
     saved = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, null=True, blank=True, help_text="Amount saved by customer")
     
-   
+    coupon = models.ManyToManyField('Coupon', blank=True)
     oid = ShortUUIDField(length=10, max_length=25, alphabet="abcdefghijklmnopqrstuvxyz")
     date = models.DateTimeField(default=timezone.now)
 

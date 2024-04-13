@@ -471,6 +471,8 @@ class CreateOrderAPIView(generics.CreateAPIView):
 
         cart_id = payload['cart_id']
         user_id = payload['user_id']
+
+        cart_order_id=payload['cart_id']
         print(f"user id ======== {user_id}")
 
         if user_id == 0:
@@ -500,6 +502,7 @@ class CreateOrderAPIView(generics.CreateAPIView):
         city = city, 
         country = country,  
         email = email, 
+        cart_order_id=cart_order_id,
         payment_status="pending", 
 
         )
@@ -626,9 +629,9 @@ class StripeCheckoutView(generics.CreateAPIView):
         print(f"cart id is----------{cart_id}")
         order = CartOrder.objects.get(oid=order_oid)
 
-        carts = Cart.objects.filter(cart_id=cart_id)
+        #carts = Cart.objects.filter(cart_id=cart_id)
 
-        print(f"carts  is----------{carts}")
+        #print(f"carts  is----------{carts}")
 
 
         if not order:
@@ -651,14 +654,14 @@ class StripeCheckoutView(generics.CreateAPIView):
                     }
                 ],
                 mode='payment',
-                success_url ='http://localhost:5173/payment-success/' + order.oid + '?session_id={CHECKOUT_SESSION_ID}',
-                cancel_url ='http://localhost:5173/payment-failed/?session_id={CHECKOUT_SESSION_ID'
+                success_url ='http://localhost:4200/payment-success/' + order.oid + '?session_id={CHECKOUT_SESSION_ID}',
+                cancel_url ='http://localhost:4200/payment-failed/?session_id={CHECKOUT_SESSION_ID'
 
             )
 
             order.stripe_session_id = checkout_session.stripe_id
             order.save()
-            carts.delete()
+            #carts.delete()
 
             return redirect(checkout_session.url)
         except stripe.error.StripeError as e:
@@ -681,6 +684,11 @@ class PaymentSuccessView(generics.CreateAPIView):
 
         order_items = CartOrderItem.objects.filter(order=order)
 
+        cart_id = order.cart_order_id
+
+        carts = Cart.objects.filter(cart_id=cart_id)
+
+
         if session_id != 'null':
             session = stripe.checkout.Session.retrieve(session_id)
 
@@ -688,6 +696,7 @@ class PaymentSuccessView(generics.CreateAPIView):
                 if order.payment_status == "pending":
                     order.payment_status = "paid"
                     order.save()
+                    carts.delete()
 
                     #send notification to customers
                     if order.buyer != None:
