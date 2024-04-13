@@ -23,6 +23,7 @@ urlpatterns = [
     path('product/category/<str:category>/',store_views.ProductCategory.as_view()),
     path('reviews/',store_views.ReviewListAPIView.as_view()),
     path('reviews/<product_id>/',store_views.ReviewListAPIView.as_view()),
+    #path('reviews/summary/<product_id>/',store_views.ReviewSummaryAPIView.as_view()),
 
     path('product/brand/<str:brand>/',store_views.ProductBrandListAPIView.as_view()),
 

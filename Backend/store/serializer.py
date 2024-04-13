@@ -186,10 +186,11 @@ class VendorSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     
+    
     profile = ProfileReviewSerializer()
     class Meta:
         model = Review
-        fields = ['id','profile','review','rating','date' ]
+        fields = ['id','profile','review','rating','date']
 
     def __init__(self, *args, **kwargs):
         super(ReviewSerializer, self).__init__(*args, **kwargs)
@@ -264,3 +265,18 @@ class NotificationSerializer(serializers.ModelSerializer):
             self.Meta.depth = 0
         else:
             self.Meta.depth = 3
+
+
+
+
+
+
+
+
+class ReviewSummarySerializer(serializers.Serializer):
+
+    one_star = serializers.IntegerField(default=0)
+    two_star = serializers.IntegerField(default=0)
+    three_star = serializers.IntegerField(default=0)
+    four_star = serializers.IntegerField(default=0)
+    five_star = serializers.IntegerField(default=0)

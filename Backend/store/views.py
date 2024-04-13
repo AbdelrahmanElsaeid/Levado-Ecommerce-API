@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from store.models import Category,Product,Cart,Tax,CartOrder,CartOrderItem,Review,Brand,Notification,Coupon
-from store.serializer import CartSerializer, ProductListSerializer,ProductDetailSerializer,CategorySerializer,CartOrderSerializer,ReviewSerializer,BrandSerializer,CouponSerializer
+from store.serializer import CartSerializer, ProductListSerializer,ProductDetailSerializer,CategorySerializer,CartOrderSerializer,ReviewSerializer,BrandSerializer,CouponSerializer,ReviewSummarySerializer
 from rest_framework import generics,status
 from rest_framework.permissions import AllowAny 
 from userauths.models import User
@@ -175,29 +175,84 @@ class ProductDetailAPIView(generics.RetrieveAPIView):
 
 
 
-class ReviewListAPIView(generics.ListCreateAPIView):
-    serializer_class = ReviewSerializer
-    permission_classes=[AllowAny,]
+# class ReviewListAPIView(generics.ListCreateAPIView):
+#     serializer_class = ReviewSerializer
+#     permission_classes=[AllowAny,]
 
+
+#     def get_queryset(self):
+#         product_id = self.kwargs['product_id']
+
+#         product=Product.objects.get(id=product_id)
+#         reviews=Review.objects.filter(product=product)
+        
+#         return reviews
+    
+#     def create(self,request,*args, **kwargs):
+#         payload = request.data
+
+#         user_id = payload['user_id']
+#         product_id= payload['product_id']
+#         rating = payload['rating']
+#         review = payload['review']
+
+#         user = User.objects.get(id=user_id)
+#         product=Product.objects.get(id=product_id)
+
+
+#         Review.objects.create(
+#             user=user,
+#             product=product,
+#             rating=rating,
+#             review=review,
+#         )
+
+#         return Response({"message":"Review Created Successfully"}, status=status.HTTP_201_CREATED)
+    
+
+
+
+class ReviewListAPIView(generics.ListCreateAPIView):
+    permission_classes = [AllowAny,]
 
     def get_queryset(self):
         product_id = self.kwargs['product_id']
-
-        product=Product.objects.get(id=product_id)
-        reviews=Review.objects.filter(product=product)
+        product = Product.objects.get(id=product_id)
+        reviews = Review.objects.filter(product=product)
         return reviews
     
-    def create(self,request,*args, **kwargs):
+    def list(self, request, *args, **kwargs):
+        product_id = self.kwargs['product_id']
+        product = Product.objects.get(id=product_id)
+
+        reviews = Review.objects.filter(product=product)
+        review_serializer = ReviewSerializer(reviews, many=True)
+
+        review_summary = {
+            "one_star": reviews.filter(rating=1).count(),
+            "two_star": reviews.filter(rating=2).count(),
+            "three_star": reviews.filter(rating=3).count(),
+            "four_star": reviews.filter(rating=4).count(),
+            "five_star": reviews.filter(rating=5).count()
+        }
+        review_summary_serializer = ReviewSummarySerializer(data=review_summary)
+        review_summary_serializer.is_valid()
+
+        return Response({
+            "reviews": review_serializer.data,
+            "summary": review_summary_serializer.data
+        })
+
+    def create(self, request, *args, **kwargs):
         payload = request.data
 
         user_id = payload['user_id']
-        product_id= payload['product_id']
+        product_id = payload['product_id']
         rating = payload['rating']
         review = payload['review']
 
         user = User.objects.get(id=user_id)
-        product=Product.objects.get(id=product_id)
-
+        product = Product.objects.get(id=product_id)
 
         Review.objects.create(
             user=user,
@@ -206,9 +261,7 @@ class ReviewListAPIView(generics.ListCreateAPIView):
             review=review,
         )
 
-        return Response({"message":"Review Created Successfully"}, status=status.HTTP_201_CREATED)
-    
-
+        return Response({"message": "Review Created Successfully"}, status=status.HTTP_201_CREATED)
 
 
 class CartAPIView(generics.ListCreateAPIView):
@@ -447,6 +500,7 @@ class CreateOrderAPIView(generics.CreateAPIView):
         city = city, 
         country = country,  
         email = email, 
+        payment_status="pending", 
 
         )
 
