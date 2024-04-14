@@ -10,6 +10,7 @@ urlpatterns = [
     path('user/register/', userauths_views.RegisterView.as_view()),
     path('user/password-reset/<email>/', userauths_views.PasswordRestEmailVerify.as_view()),
     path('user/password-change/', userauths_views.PasswordChangeView.as_view()),
+    path('user/profile/<user_id>/', userauths_views.ProfileView.as_view()),
 
     # Store Endpoint
     path('productss/', store_views.Fpro.as_view()),
