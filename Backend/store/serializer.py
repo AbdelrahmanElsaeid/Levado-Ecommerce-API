@@ -185,10 +185,14 @@ class VendorSerializer(serializers.ModelSerializer):
         else:
             self.Meta.depth = 3
 
+from django.conf import settings
+
 class ReviewSerializer(serializers.ModelSerializer):
     
     
     profile = ProfileReviewSerializer()
+
+   
     class Meta:
         model = Review
         fields = ['id','profile','review','rating','date']

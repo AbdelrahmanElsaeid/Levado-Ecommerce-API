@@ -215,6 +215,18 @@ class ProductDetailAPIView(generics.RetrieveAPIView):
 class ReviewListAPIView(generics.ListCreateAPIView):
     permission_classes = [AllowAny,]
 
+
+    def get_complete_image_url(self, image_path):
+        # Assuming BASE_URL is defined in your Django settings
+        if isinstance(settings.BASE_URL, tuple):
+            # Convert tuple to string
+            base_url = ''.join(settings.BASE_URL)
+        else:
+            base_url = settings.BASE_URL
+        return base_url + image_path
+    
+   
+
     def get_queryset(self):
         product_id = self.kwargs['product_id']
         product = Product.objects.get(id=product_id)
@@ -227,6 +239,12 @@ class ReviewListAPIView(generics.ListCreateAPIView):
 
         reviews = Review.objects.filter(product=product)
         review_serializer = ReviewSerializer(reviews, many=True)
+
+
+        for review in review_serializer.data:
+            profile = review['profile']
+            if profile and 'image' in profile:
+                profile['image'] = self.get_complete_image_url(profile['image'])
 
         review_summary = {
             "one_star": reviews.filter(rating=1).count(),

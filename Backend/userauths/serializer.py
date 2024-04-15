@@ -3,6 +3,8 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import generics, status
 from rest_framework.response import Response
 from django.db import IntegrityError
+from django.conf import settings
+
 
 from .models import User, Profile
 from django.contrib.auth.password_validation import validate_password
@@ -113,9 +115,10 @@ class ProfileSerializer(serializers.ModelSerializer):
         return response   
     
 
+from django.conf import settings
 
 class ProfileReviewSerializer(serializers.ModelSerializer):
-
+    
     class Meta:
         model = Profile
         fields = ['id','full_name', 'image']
