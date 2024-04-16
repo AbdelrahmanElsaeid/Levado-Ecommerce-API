@@ -285,3 +285,90 @@ class ReviewSummarySerializer(serializers.Serializer):
     three_star = serializers.IntegerField(default=0)
     four_star = serializers.IntegerField(default=0)
     five_star = serializers.IntegerField(default=0)
+
+
+
+
+
+################################
+
+
+
+
+
+
+
+
+
+
+
+class SummarySerializer(serializers.Serializer):
+    products = serializers.IntegerField()
+    orders = serializers.IntegerField()
+    revenue = serializers.DecimalField(max_digits=12, decimal_places=2)
+
+
+class EarningSerializer(serializers.Serializer):
+    monthly_revenue = serializers.DecimalField(max_digits=12, decimal_places=2)    
+    total_revenue = serializers.DecimalField(max_digits=12, decimal_places=2)    
+
+
+
+class CouponSummarySerializer(serializers.Serializer):
+    total_coupons = serializers.IntegerField(default=0)
+    active_coupons = serializers.IntegerField(default=0)    
+
+
+
+class NotificationSummarySerializer(serializers.Serializer):
+    un_read_noti = serializers.IntegerField(default=0)
+    read_noti = serializers.IntegerField(default=0)
+    all_noti = serializers.IntegerField(default=0)    
+
+
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    gallery = GallerySerializer(many=True,required=False)
+    color = ColorSerializer(many=True,required=False)
+    size = SizeSerializer(many=True,required=False)
+    specification = SpecificationSerializer(many=True,required=False)
+    
+    class Meta:
+        model = Product
+        fields = [
+            "id",
+            "title",
+            "image",
+            "description",
+            "category",
+            "price",
+            "old_price",
+            "shipping_amount",
+            "stock_qty",
+            "in_stock",
+            "status",
+            "featured",
+            "views",
+            "rating",
+            "vendor",
+            "pid",
+            "slug",
+            "date",
+            "gallery",
+            "specification",
+            "size",
+            "color",
+            "product_rating",
+            "rating_count",
+            "orders",
+        ]
+    
+    def __init__(self, *args, **kwargs):
+        super(ProductSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request and request.method == 'POST':
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
+

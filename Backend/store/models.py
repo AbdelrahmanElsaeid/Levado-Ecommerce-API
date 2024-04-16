@@ -84,6 +84,8 @@ class Product(models.Model):
         return Color.objects.filter(product=self)
     def size(self):
         return Size.objects.filter(product=self)
+    def orders(self):
+        return CartOrderItem.objects.filter(product=self).count()
     
     def save(self,*args, **kwargs):
         #if self.slug == "" or self.slug== None:
