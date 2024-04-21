@@ -42,8 +42,9 @@ class Product(models.Model):
     description = models.TextField(null=True, blank=True)
     category= models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
     brand= models.ForeignKey(Brand, on_delete=models.CASCADE, null=True, blank=True)
-    price = models.DecimalField(decimal_places=2, max_digits=12, default=0.00)
-    old_price = models.DecimalField(decimal_places=2, max_digits=12, default=0.00)
+    price_EGP = models.DecimalField(decimal_places=2, max_digits=12, default=0.00 , null=True, blank=True)
+    price_AED = models.DecimalField(decimal_places=2, max_digits=12, default=0.00, null=True, blank=True)
+    old_price = models.DecimalField(decimal_places=2, max_digits=12, default=0.00, null=True, blank=True)
     shipping_amount = models.DecimalField(decimal_places=2, max_digits=12, default=0.00)
     stock_qty = models.PositiveIntegerField(default=1)
     in_stock = models.BooleanField(default=True)
@@ -95,7 +96,7 @@ class Product(models.Model):
 
 
 class Gallery(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     image = models.FileField(upload_to="products",default="product.jpg")
     active = models.BooleanField(default=True)
     date=models.DateTimeField(auto_now_add=True)
@@ -109,7 +110,7 @@ class Gallery(models.Model):
     
 
 class Specification(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=1000)
     content=models.CharField(max_length=1000)
     date=models.DateTimeField(auto_now_add=True)
@@ -119,7 +120,7 @@ class Specification(models.Model):
 
 
 class Size(models.Model):
-    product = models.ForeignKey(Product,related_name="size_product", on_delete=models.CASCADE)
+    product = models.ForeignKey(Product,related_name="size_product", on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=1000)
     price = models.DecimalField(decimal_places=2, max_digits=12, default=0.00)
     date=models.DateTimeField(auto_now_add=True)
@@ -130,7 +131,7 @@ class Size(models.Model):
    
 
 class Color(models.Model):
-    product = models.ForeignKey(Product,related_name="color_product", on_delete=models.CASCADE)
+    product = models.ForeignKey(Product,related_name="color_product", on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=1000)
     color_code = models.CharField(max_length=1000)
 

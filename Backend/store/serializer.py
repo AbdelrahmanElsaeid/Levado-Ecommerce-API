@@ -52,7 +52,8 @@ class ProductListSerializer(serializers.ModelSerializer):
             "title",
             "image",
             
-            "price",
+            "price_EGP",
+            "price_AED",
             
             "views",
             "rating",
@@ -82,7 +83,8 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             "description",
             "category",
             "brand",
-            "price",
+            "price_EGP",
+            "price_AED",
             "old_price",
             "shipping_amount",
             "stock_qty",
@@ -342,7 +344,8 @@ class ProductSerializer(serializers.ModelSerializer):
             "image",
             "description",
             "category",
-            "price",
+            "price_EGP",
+            "price_AED",
             "old_price",
             "shipping_amount",
             "stock_qty",
@@ -371,4 +374,52 @@ class ProductSerializer(serializers.ModelSerializer):
             self.Meta.depth = 0
         else:
             self.Meta.depth = 3
+
+
+
+class ProductAddSerializer(serializers.ModelSerializer):
+    gallery = GallerySerializer(many=True,required=False,read_only=True)
+    color = ColorSerializer(many=True,required=False)
+    size = SizeSerializer(many=True,required=False)
+    specification = SpecificationSerializer(many=True,required=False)
+    
+    class Meta:
+        model = Product
+        fields = [
+            "id",
+            "title",
+            "image",
+            "description",
+            "category",
+            "brand",
+            "price_EGP",
+            "price_AED",
+            "old_price",
+            "shipping_amount",
+            "stock_qty",
+            "in_stock",
+            "status",
+            "featured",
+            "views",
+            #"rating",
+            "vendor",
+            "pid",
+            "slug",
+            "date",
+            "gallery",
+            "specification",
+            "size",
+            "color",
+            "product_rating",
+            "rating_count",
+            "orders",
+        ]
+    
+    def __init__(self, *args, **kwargs):
+        super(ProductAddSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request and request.method == 'POST':
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3            
 

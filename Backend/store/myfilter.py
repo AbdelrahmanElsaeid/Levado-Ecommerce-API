@@ -18,5 +18,6 @@ class ProductFilter(filters.FilterSet):
             #"category": ["exact"],
             #"brand": ["exact"],
             "rating": ["exact"],
-            "price": ["lte", "gte", "range"],
+            "price_EGP": ["lte", "gte", "range"],
+            "price_AED": ["lte", "gte", "range"],
         }

@@ -17,18 +17,20 @@ class SizeInline(admin.TabularInline):
     extra=0        
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display=['id','title','price','category','brand','shipping_amount','stock_qty','in_stock','vendor','featured']
+    list_display=['id','title','price_EGP','price_AED','category','brand','shipping_amount','stock_qty','in_stock','vendor','featured']
     list_editable=['featured']
     list_filter=['date']
     search_fields=['title']
     inlines = [GalleryInline, ColorInline,SizeInline,SpecificationInline]
 
+class BrandAdmin(admin.ModelAdmin):
+    list_display=['id','title']
 
 
 admin.site.register(Product,ProductAdmin)
 admin.site.register(Category)
 
-admin.site.register(Brand)
+admin.site.register(Brand,BrandAdmin)
 admin.site.register(Coupon)
 admin.site.register(Cart)
 admin.site.register(CartOrder)
@@ -38,6 +40,7 @@ admin.site.register(Notification)
 admin.site.register(Review)
 admin.site.register(Wishlist)
 admin.site.register(Tax)
+
 
 
 
