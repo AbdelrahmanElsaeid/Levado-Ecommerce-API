@@ -36,13 +36,17 @@ class ColorSerializer(serializers.ModelSerializer):
         model = Color
         fields = '__all__'
 
+# class PriceSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Prices
+#         fields = '__all__'
+
 class ProductListSerializer(serializers.ModelSerializer):
-    # gallery = GallerySerializer(many=True)
-    # color = ColorSerializer(many=True)
-    # size = SizeSerializer(many=True)
-    # specification = SpecificationSerializer(many=True)
+    
     category = serializers.StringRelatedField()
     brand = serializers.StringRelatedField()
+    price = serializers.SerializerMethodField()  
+    currency = serializers.SerializerMethodField()
 
     
     class Meta:
@@ -51,9 +55,9 @@ class ProductListSerializer(serializers.ModelSerializer):
             "id",
             "title",
             "image",
-            
-            "price_EGP",
-            "price_AED",
+           
+            "price",
+            "currency",
             
             "views",
             "rating",
@@ -65,6 +69,24 @@ class ProductListSerializer(serializers.ModelSerializer):
             "slug",
         ]
 
+    def get_price(self, obj):
+        currency_code = self.context.get('currency_code')
+        if currency_code == 'EGP':
+            return obj.price_EGP
+        elif currency_code == 'AED':
+            return obj.price_AED
+        else:
+            return None
+        
+    def get_currency(self, obj):
+        currency_code = self.context.get('currency_code')
+        if currency_code == 'EGP':
+            return 'EGP'
+        elif currency_code == 'AED':
+            return 'AED'
+        else:
+            return None    
+
 class ProductDetailSerializer(serializers.ModelSerializer):
     gallery = GallerySerializer(many=True)
     color = ColorSerializer(many=True)
@@ -73,6 +95,8 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     vendor =serializers.StringRelatedField()
     category = serializers.StringRelatedField()
     brand = serializers.StringRelatedField()
+    price = serializers.SerializerMethodField()  
+    currency = serializers.SerializerMethodField()
     
     class Meta:
         model = Product
@@ -83,8 +107,11 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             "description",
             "category",
             "brand",
-            "price_EGP",
-            "price_AED",
+            #"price_EGP",
+            #"price_AED",
+            #"prices",
+            "price",
+            "currency",
             "old_price",
             "shipping_amount",
             "stock_qty",
@@ -104,6 +131,23 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             "product_rating",
             "rating_count",
         ]
+    def get_price(self, obj):
+        currency_code = self.context.get('currency_code')
+        if currency_code == 'EGP':
+            return obj.price_EGP
+        elif currency_code == 'AED':
+            return obj.price_AED
+        else:
+            return None
+        
+    def get_currency(self, obj):
+        currency_code = self.context.get('currency_code')
+        if currency_code == 'EGP':
+            return 'EGP'
+        elif currency_code == 'AED':
+            return 'AED'
+        else:
+            return None     
     
     def __init__(self, *args, **kwargs):
         super(ProductDetailSerializer, self).__init__(*args, **kwargs)
@@ -335,6 +379,7 @@ class ProductSerializer(serializers.ModelSerializer):
     color = ColorSerializer(many=True,required=False)
     size = SizeSerializer(many=True,required=False)
     specification = SpecificationSerializer(many=True,required=False)
+    #prices = PriceSerializer(many=True,required=False)
     
     class Meta:
         model = Product
@@ -346,6 +391,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "category",
             "price_EGP",
             "price_AED",
+            #"prices",
             "old_price",
             "shipping_amount",
             "stock_qty",
@@ -382,6 +428,8 @@ class ProductAddSerializer(serializers.ModelSerializer):
     color = ColorSerializer(many=True,required=False)
     size = SizeSerializer(many=True,required=False)
     specification = SpecificationSerializer(many=True,required=False)
+    #prices = PriceSerializer(many=True,required=False)
+
     
     class Meta:
         model = Product
@@ -394,6 +442,7 @@ class ProductAddSerializer(serializers.ModelSerializer):
             "brand",
             "price_EGP",
             "price_AED",
+            #"prices",
             "old_price",
             "shipping_amount",
             "stock_qty",

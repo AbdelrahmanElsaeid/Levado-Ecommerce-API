@@ -15,20 +15,21 @@ urlpatterns = [
     path('user/profile/<user_id>/', userauths_views.ProfileView.as_view()),
 
     # Store Endpoint
-    path('productss/', store_views.Fpro.as_view()),
+    path('productss/<currency>/', store_views.Fpro.as_view()),
+
 
 
 
     path('category/', store_views.CategoryListAPIView.as_view()),
     path('brand/', store_views.BrandListAPIView.as_view()),
-    path('product/', store_views.ProductListAPIView.as_view()),
-    path('product/<slug:slug>/', store_views.ProductDetailAPIView.as_view()),
-    path('product/category/<str:category>/',store_views.ProductCategory.as_view()),
+    path('product/<currency>/', store_views.ProductListAPIView.as_view()),
+    path('product/<currency>/<slug:slug>/', store_views.ProductDetailAPIView.as_view()),
+    path('product/category/<currency>/<str:category>/',store_views.ProductCategory.as_view()),
     path('reviews/',store_views.ReviewListAPIView.as_view()),
     path('reviews/<product_id>/',store_views.ReviewListAPIView.as_view()),
     #path('reviews/summary/<product_id>/',store_views.ReviewSummaryAPIView.as_view()),
 
-    path('product/brand/<str:brand>/',store_views.ProductBrandListAPIView.as_view()),
+    path('product/brand/<currency>/<str:brand>/',store_views.ProductBrandListAPIView.as_view()),
 
 
 

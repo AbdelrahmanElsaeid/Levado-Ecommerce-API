@@ -14,10 +14,13 @@ class SpecificationInline(admin.TabularInline):
     extra=0
 class SizeInline(admin.TabularInline):
     model = Size   
-    extra=0        
+    extra=0    
+# class PricesInline(admin.TabularInline):
+#     model = Prices   
+#     extra=0           
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display=['id','title','price_EGP','price_AED','category','brand','shipping_amount','stock_qty','in_stock','vendor','featured']
+    list_display=['id','title','category','brand','shipping_amount','stock_qty','in_stock','vendor','featured']
     list_editable=['featured']
     list_filter=['date']
     search_fields=['title']

@@ -12,6 +12,7 @@ from .mypagination import ProductPagination
 import stripe
 from django.conf import settings
 from django.db.models import Q
+from django.http import Http404
 
 # Create your views here.
 
@@ -24,88 +25,6 @@ def send_notification(user=None, vendor=None, order=None, order_item=None):
         order=order,
         order_item=order_item
     )
-
-
-class Fpro(generics.ListAPIView):
-
-    serializer_class = ProductListSerializer
-    permission_classes = [AllowAny]
-    pagination_class = ProductPagination
-
-    def get_queryset(self):
-        queryset = Product.objects.all()
-      
-
-        brand_ids_str = self.request.query_params.get('brand_ids')
-        category_ids_str = self.request.query_params.get('category_ids')
-        prices_str = self.request.query_params.get('price')
-        rating_str = self.request.query_params.get('rating')
-        title_query = self.request.query_params.get('title')
-
-        
-
-        brand_ids = []
-        category_ids = []
-        prices = []
-        min_price = None
-        max_price = None
-        rating = None
-
-        if brand_ids_str:
-            if brand_ids_str != '[]':
-                brand_ids = [int(id) for id in brand_ids_str.strip('[]').split(',')]
-        
-        if category_ids_str:
-            if category_ids_str != '[]':
-                category_ids = [int(id) for id in category_ids_str.strip('[]').split(',')]
-
-        if prices_str:
-            if prices_str != '[]':
-                prices = [float(price) for price in prices_str.strip('[]').split(',')]
-                min_price, max_price = prices[0], prices[1] if len(prices) > 1 else None 
-
-        # if rating_str:  
-        #     if rating_str != '[]':  
-        #         rating_values = [int(rating) for rating in rating_str.strip('[]').split(',')]
-        #         rating = rating_values[0]
-
-        if rating_str:  
-            if rating_str != '':  
-                rating = int(rating_str)
-        
-
-        #-------------------filter---------------
-
-        #print(f"rating-------{rating}")
-
-
-        if brand_ids:
-            queryset = queryset.filter(brand__id__in=brand_ids)
-
-        if category_ids:
-            queryset = queryset.filter(category__id__in=category_ids)
-
-        if min_price is not None and max_price is not None:
-            queryset = queryset.filter(price__range=(min_price, max_price))
-
-        if rating is not None:
-            queryset = queryset.filter(rating__gte=rating)
-
-        if title_query:
-            queryset = queryset.filter(title__icontains=title_query)                
-
-        return queryset
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -130,12 +49,17 @@ class ProductBrandListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         name=self.kwargs.get('brand')
+        currency_code = self.kwargs.get('currency')
         if name:
             brand= Brand.objects.get(title=name)
             queryset = Product.objects.filter(brand=brand)
         else: 
             queryset=Product.objects.all()    
         return queryset
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['currency_code'] = self.kwargs.get('currency')
+        return context 
 
 
 class ProductCategory(generics.ListAPIView):
@@ -146,12 +70,17 @@ class ProductCategory(generics.ListAPIView):
 
     def get_queryset(self):
         name=self.kwargs.get('category')
+        currency_code = self.kwargs.get('currency')
         if name:
             category= Category.objects.get(title=name)
             queryset = Product.objects.filter(category=category)
         else: 
             queryset=Product.objects.all()    
         return queryset
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['currency_code'] = self.kwargs.get('currency')
+        return context 
 
 
 class ProductListAPIView(generics.ListAPIView):
@@ -162,6 +91,25 @@ class ProductListAPIView(generics.ListAPIView):
 
     filterset_class = ProductFilter
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        currency_code = self.kwargs.get('currency')
+
+        if currency_code not in ['EGP', 'AED']:
+            raise Http404("Invalid currency code")  # Return 404 for invalid currency codes
+
+        if currency_code == 'EGP':
+            queryset = queryset.exclude(price_EGP__isnull=True)
+        else:
+            queryset = queryset.exclude(price_AED__isnull=True)
+
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['currency_code'] = self.kwargs.get('currency')
+        return context
+
 
 
 class ProductDetailAPIView(generics.RetrieveAPIView):
@@ -170,45 +118,23 @@ class ProductDetailAPIView(generics.RetrieveAPIView):
 
     def get_object(self):
         slug=self.kwargs['slug']
-        query = Product.objects.get(slug=slug)
-        return query  
+        currency_code = self.kwargs.get('currency')
+        try:
+            return Product.objects.get(slug=slug)
+        except Product.DoesNotExist:
+            raise Http404("Product not found")
+
+        # query = Product.objects.get(slug=slug)
+        # return query
+
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['currency_code'] = self.kwargs.get('currency')
+        return context  
 
 
 
-# class ReviewListAPIView(generics.ListCreateAPIView):
-#     serializer_class = ReviewSerializer
-#     permission_classes=[AllowAny,]
-
-
-#     def get_queryset(self):
-#         product_id = self.kwargs['product_id']
-
-#         product=Product.objects.get(id=product_id)
-#         reviews=Review.objects.filter(product=product)
-        
-#         return reviews
-    
-#     def create(self,request,*args, **kwargs):
-#         payload = request.data
-
-#         user_id = payload['user_id']
-#         product_id= payload['product_id']
-#         rating = payload['rating']
-#         review = payload['review']
-
-#         user = User.objects.get(id=user_id)
-#         product=Product.objects.get(id=product_id)
-
-
-#         Review.objects.create(
-#             user=user,
-#             product=product,
-#             rating=rating,
-#             review=review,
-#         )
-
-#         return Response({"message":"Review Created Successfully"}, status=status.HTTP_201_CREATED)
-    
 
 
 
@@ -736,6 +662,83 @@ class PaymentSuccessView(generics.CreateAPIView):
             else:
                 return Response({"message":"An Error Occured, Try Again..."})
         else:
-            session = None     
+            session = None   
 
+
+
+
+
+
+
+
+class Fpro(generics.ListAPIView):
+    serializer_class = ProductListSerializer
+    permission_classes = [AllowAny]
+    pagination_class = ProductPagination
+
+    def get_queryset(self):
+        currency_code = self.kwargs.get('currency')
+
+        if currency_code not in ['EGP', 'AED']:
+            raise Http404("Invalid currency code")  # Return 404 for invalid currency codes
+
+        if currency_code == 'EGP':
+            queryset = Product.objects.exclude(price_EGP__isnull=True)
+        else:
+            queryset = Product.objects.exclude(price_AED__isnull=True)
+
+        brand_ids_str = self.request.query_params.get('brand_ids')
+        category_ids_str = self.request.query_params.get('category_ids')
+        prices_str = self.request.query_params.get('price')
+        rating_str = self.request.query_params.get('rating')
+        title_query = self.request.query_params.get('title')
+
+        brand_ids = []
+        category_ids = []
+        prices = []
+        min_price = None
+        max_price = None
+        rating = None
+
+        if brand_ids_str:
+            if brand_ids_str != '[]':
+                brand_ids = [int(id) for id in brand_ids_str.strip('[]').split(',')]
+        
+        if category_ids_str:
+            if category_ids_str != '[]':
+                category_ids = [int(id) for id in category_ids_str.strip('[]').split(',')]
+
+        if prices_str:
+            if prices_str != '[]':
+                prices = [float(price) for price in prices_str.strip('[]').split(',')]
+                min_price, max_price = prices[0], prices[1] if len(prices) > 1 else None 
+
+        if rating_str:  
+            if rating_str != '':  
+                rating = int(rating_str)
+
+        if brand_ids:
+            queryset = queryset.filter(brand__id__in=brand_ids)
+
+        if category_ids:
+            queryset = queryset.filter(category__id__in=category_ids)
+
+        if min_price is not None and max_price is not None:
+            if currency_code == 'EGP':
+                queryset = queryset.filter(price_EGP__range=(min_price, max_price))
+            else:
+                queryset = queryset.filter(price_AED__range=(min_price, max_price))
+
+        if rating is not None:
+            queryset = queryset.filter(rating__gte=rating)
+
+        if title_query:
+            queryset = queryset.filter(title__icontains=title_query)
+
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['currency_code'] = self.kwargs.get('currency')
+        return context
 

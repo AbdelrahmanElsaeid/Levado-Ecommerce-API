@@ -94,6 +94,17 @@ class Product(models.Model):
         self.rating = self.product_rating()
         super(Product, self).save(*args, **kwargs)
 
+# class Prices(models.Model):
+#     CURRENCY_CHOICES = (
+#         ('AED', 'AED'),
+#         ('EGP', 'EGP'),
+#         )
+#     product = models.ForeignKey(Product,related_name="productprice" ,on_delete=models.CASCADE)
+#     currency = models.CharField(max_length=5, choices=CURRENCY_CHOICES) 
+#     price = models.DecimalField(decimal_places=2, max_digits=12)
+
+#     class Meta:
+#         unique_together = ('product', 'currency')
 
 class Gallery(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
