@@ -47,14 +47,33 @@ class ProductBrandListAPIView(generics.ListAPIView):
     permission_classes = [AllowAny]
     pagination_class = ProductPagination
 
+    # def get_queryset(self):
+    #     name=self.kwargs.get('brand')
+    #     currency_code = self.kwargs.get('currency')
+    #     if name:
+    #         brand= Brand.objects.get(title=name)
+    #         queryset = Product.objects.filter(brand=brand)
+    #     else: 
+    #         queryset=Product.objects.all()    
+    #     return queryset
     def get_queryset(self):
-        name=self.kwargs.get('brand')
+        name = self.kwargs.get('brand')
         currency_code = self.kwargs.get('currency')
+
+        if currency_code not in ['EGP', 'AED']:
+            raise Http404("Invalid currency code")
+
         if name:
-            brand= Brand.objects.get(title=name)
+            brand = Brand.objects.get(title=name)
             queryset = Product.objects.filter(brand=brand)
-        else: 
-            queryset=Product.objects.all()    
+        else:
+            queryset = Product.objects.all()
+
+        if currency_code == 'EGP':
+            queryset = queryset.exclude(price_EGP=0)
+        else:
+            queryset = queryset.exclude(price_AED=0)
+
         return queryset
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -68,14 +87,33 @@ class ProductCategory(generics.ListAPIView):
     permission_classes = [AllowAny]
     pagination_class = ProductPagination
 
+    # def get_queryset(self):
+    #     name=self.kwargs.get('category')
+    #     currency_code = self.kwargs.get('currency')
+    #     if name:
+    #         category= Category.objects.get(title=name)
+    #         queryset = Product.objects.filter(category=category)
+    #     else: 
+    #         queryset=Product.objects.all()    
+    #     return queryset
     def get_queryset(self):
-        name=self.kwargs.get('category')
+        name = self.kwargs.get('category')
         currency_code = self.kwargs.get('currency')
+
+        if currency_code not in ['EGP', 'AED']:
+            raise Http404("Invalid currency code")
+
         if name:
-            category= Category.objects.get(title=name)
+            category = Category.objects.get(title=name)
             queryset = Product.objects.filter(category=category)
-        else: 
-            queryset=Product.objects.all()    
+        else:
+            queryset = Product.objects.all()
+
+        if currency_code == 'EGP':
+            queryset = queryset.exclude(price_EGP=0)
+        else:
+            queryset = queryset.exclude(price_AED=0)
+
         return queryset
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -96,12 +134,17 @@ class ProductListAPIView(generics.ListAPIView):
         currency_code = self.kwargs.get('currency')
 
         if currency_code not in ['EGP', 'AED']:
-            raise Http404("Invalid currency code")  # Return 404 for invalid currency codes
+            raise Http404("Invalid currency code")  
 
         if currency_code == 'EGP':
-            queryset = queryset.exclude(price_EGP__isnull=True)
+            queryset = queryset.exclude(price_EGP=0)
         else:
-            queryset = queryset.exclude(price_AED__isnull=True)
+            
+            queryset = queryset.exclude(price_AED=0) 
+
+        
+
+
 
         return queryset
 
@@ -679,13 +722,13 @@ class Fpro(generics.ListAPIView):
     def get_queryset(self):
         currency_code = self.kwargs.get('currency')
 
-        if currency_code not in ['EGP', 'AED']:
-            raise Http404("Invalid currency code")  # Return 404 for invalid currency codes
-
         if currency_code == 'EGP':
-            queryset = Product.objects.exclude(price_EGP__isnull=True)
+            queryset = Product.objects.exclude(price_EGP=0)
+        elif currency_code == 'AED':
+            queryset = Product.objects.exclude(price_AED=0)
         else:
-            queryset = Product.objects.exclude(price_AED__isnull=True)
+            # If the currency is not supported, you can handle it here
+            queryset = Product.objects.none()
 
         brand_ids_str = self.request.query_params.get('brand_ids')
         category_ids_str = self.request.query_params.get('category_ids')
