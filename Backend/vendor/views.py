@@ -647,6 +647,7 @@ class ProductDeleteView(generics.DestroyAPIView):
 
         for item in serializer:
                 item['image'] = self.get_complete_image_url(item['image'])
+                item['category']['image'] = self.get_complete_image_url(item['category']['image'])
 
      
 
@@ -658,5 +659,5 @@ class ProductDeleteView(generics.DestroyAPIView):
             "products": serializer,
             
            
-        }, status=status.HTTP_204_NO_CONTENT)
+        }, status=status.HTTP_200_OK)
 
