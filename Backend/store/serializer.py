@@ -429,6 +429,7 @@ class ProductAddSerializer(serializers.ModelSerializer):
     size = SizeSerializer(many=True,required=False)
     specification = SpecificationSerializer(many=True,required=False)
     #prices = PriceSerializer(many=True,required=False)
+    #image = serializers.SerializerMethodField()
 
     
     class Meta:
@@ -463,6 +464,14 @@ class ProductAddSerializer(serializers.ModelSerializer):
             "rating_count",
             "orders",
         ]
+
+
+
+    # def get_image(self, instance):
+    #     request = self.context.get('request')
+    #     if instance.image:
+    #         return request.build_absolute_uri(instance.image.url)
+    #     return None    
     
     def __init__(self, *args, **kwargs):
         super(ProductAddSerializer, self).__init__(*args, **kwargs)

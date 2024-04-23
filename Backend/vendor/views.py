@@ -568,9 +568,36 @@ class ProductUpdateView(generics.RetrieveUpdateAPIView):
 
 
 
+# class ProductDeleteView(generics.DestroyAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductAddSerializer
+
+#     def get_object(self):
+#         vendor_id = self.kwargs['vendor_id']
+#         product_pid = self.kwargs['product_pid']
+
+#         vendor = Vendor.objects.get(id=vendor_id)
+#         product = Product.objects.get(pid=product_pid, vendor=vendor)
+#         return product
+    
+#     def destroy(self, request, *args, **kwargs):
+#         instance = self.get_object()
+#         self.perform_destroy(instance)
+#         return Response({"status": "Success", "message": "Product deleted successfully."}, status=status.HTTP_200_OK)
+
+
+
+from django.conf import settings
+
+
 class ProductDeleteView(generics.DestroyAPIView):
-    queryset = Product.objects.all()
     serializer_class = ProductAddSerializer
+
+    def get_queryset(self):
+        vendor_id = self.kwargs['vendor_id']
+        vendor = Vendor.objects.get(id=vendor_id)
+        products = Product.objects.filter(vendor=vendor)
+        return products
 
     def get_object(self):
         vendor_id = self.kwargs['vendor_id']
@@ -579,8 +606,57 @@ class ProductDeleteView(generics.DestroyAPIView):
         vendor = Vendor.objects.get(id=vendor_id)
         product = Product.objects.get(pid=product_pid, vendor=vendor)
         return product
+    def get_complete_image_url(self, image_path):
+        # Assuming BASE_URL is defined in your Django settings
+        if isinstance(settings.BASE_URL, tuple):
+            # Convert tuple to string
+            base_url = ''.join(settings.BASE_URL)
+        else:
+            base_url = settings.BASE_URL
+        return base_url + image_path
     
+
+    def get_stats_data(self):
+        stats_view = DashboardStatsAPIView()
+        stats_view.kwargs = {'vendor_id': self.kwargs['vendor_id']}
+        stats_view.request = self.request
+        stats_view.format_kwarg = None
+        stats_view.format = self.format_kwarg
+        stats_view.check_permissions(stats_view.request)
+        stats_view.check_object_permissions(stats_view.request, None)
+        queryset = stats_view.get_queryset()
+        stats_view.list(self.request)
+        serializer = stats_view.get_serializer(queryset, many=True)
+        return serializer.data[0]
+    
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
-        return Response({"status": "Success", "message": "Product deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+        # Fetch dashboard statistics
+        
+        stats_data = self.get_stats_data()
+
+
+
+
+        
+        queryset = self.get_queryset()  
+        serializer = self.serializer_class(queryset, many=True).data 
+
+        for item in serializer:
+                item['image'] = self.get_complete_image_url(item['image'])
+
+     
+
+
+        return Response({
+            "status": "Success",
+            "message": "Product deleted successfully",
+            "dashboard_stats": stats_data,
+            "products": serializer,
+            
+           
+        }, status=status.HTTP_204_NO_CONTENT)
+
