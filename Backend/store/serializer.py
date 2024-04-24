@@ -511,3 +511,57 @@ class ProductAddSerializer(serializers.ModelSerializer):
         else:
             self.Meta.depth = 3            
 
+
+
+
+class Gallery2Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Gallery
+        fields = '__all__'
+
+class Specification2Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Specification
+        fields = '__all__'
+
+class Size2Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Size
+        fields = '__all__'
+
+class Color2Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Color
+        fields = '__all__'
+
+class Product2Serializer(serializers.ModelSerializer):
+    #galleries = Gallery2Serializer(many=True, required=False)
+    specifications = Specification2Serializer(many=True, required=False)
+    sizes = Size2Serializer(many=True, required=False)
+    colors = Color2Serializer(many=True, required=False)
+
+    class Meta:
+        model = Product
+        fields = '__all__'
+
+    def create(self, validated_data):
+        #galleries_data = validated_data.pop('galleries', [])
+        specifications_data = validated_data.pop('specifications', [])
+        sizes_data = validated_data.pop('sizes', [])
+        colors_data = validated_data.pop('colors', [])
+
+        product = Product.objects.create(**validated_data)
+
+        # for gallery_data in galleries_data:
+        #     Gallery.objects.create(product=product, **gallery_data)
+
+        for specification_data in specifications_data:
+            Specification.objects.create(product=product, **specification_data)
+
+        for size_data in sizes_data:
+            Size.objects.create(product=product, **size_data)
+
+        for color_data in colors_data:
+            Color.objects.create(product=product, **color_data)
+
+        return product    
