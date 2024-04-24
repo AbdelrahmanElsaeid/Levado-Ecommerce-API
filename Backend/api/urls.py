@@ -27,9 +27,11 @@ urlpatterns = [
     path('product/category/<currency>/<str:category>/',store_views.ProductCategory.as_view()),
     path('reviews/',store_views.ReviewListAPIView.as_view()),
     path('reviews/<product_id>/',store_views.ReviewListAPIView.as_view()),
-    #path('reviews/summary/<product_id>/',store_views.ReviewSummaryAPIView.as_view()),
+    #path('reviews/summary/<product_id>/',store_views.ReviewSummaryAPIView.as_view()), 
 
     path('product/brand/<currency>/<str:brand>/',store_views.ProductBrandListAPIView.as_view()),
+    path('product-popular/<currency>/',store_views.PopularProductsAPIView.as_view()),
+    path('product-bestseller/<currency>/',store_views.BestSellerProductsAPIView.as_view()),
 
 
 

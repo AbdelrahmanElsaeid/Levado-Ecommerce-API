@@ -67,6 +67,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             "product_rating",
             "rating_count",
             "slug",
+            "orders",
         ]
 
     def get_price(self, obj):

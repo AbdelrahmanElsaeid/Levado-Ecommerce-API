@@ -785,3 +785,86 @@ class Fpro(generics.ListAPIView):
         context['currency_code'] = self.kwargs.get('currency')
         return context
 
+
+
+
+
+
+
+
+class PopularProductsAPIView(generics.ListAPIView):
+    serializer_class = ProductListSerializer
+
+    def get_queryset(self):
+        currency_code = self.kwargs.get('currency')
+        queryset = Product.objects.all()
+        if currency_code not in ['EGP', 'AED']:
+            raise Http404("Invalid currency code")
+
+
+        if currency_code == 'EGP':
+            queryset = queryset.exclude(price_EGP=0)
+        else:
+            queryset = queryset.exclude(price_AED=0)        
+
+        # Sort products based on sales count (orders)
+        queryset = sorted(queryset, key=lambda p: p.product_rating(), reverse=True)
+
+
+        # Return the top 10 products
+        return queryset[:10]
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['currency_code'] = self.kwargs.get('currency')
+        return context 
+    
+
+
+
+
+class BestSellerProductsAPIView(generics.ListAPIView):
+    serializer_class = ProductListSerializer
+
+    def get_queryset(self):
+        currency_code = self.kwargs.get('currency')
+        queryset = Product.objects.all()
+        if currency_code not in ['EGP', 'AED']:
+            raise Http404("Invalid currency code")
+
+
+        if currency_code == 'EGP':
+            queryset = queryset.exclude(price_EGP=0)
+        else:
+            queryset = queryset.exclude(price_AED=0)        
+
+        # Sort products based on sales count (orders)
+        queryset = sorted(queryset, key=lambda p: p.orders(), reverse=True)
+
+
+        # Return the top 10 products
+        return queryset[:10]
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['currency_code'] = self.kwargs.get('currency')
+        return context 
+    
+
+
+
+     
+
+             
+
+        
