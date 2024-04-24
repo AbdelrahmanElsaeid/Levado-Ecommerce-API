@@ -808,7 +808,7 @@ class PopularProductsAPIView(generics.ListAPIView):
             queryset = queryset.exclude(price_AED=0)        
 
         # Sort products based on sales count (orders)
-        queryset = sorted(queryset, key=lambda p: p.product_rating(), reverse=True)
+        queryset = sorted(queryset, key=lambda p: p.product_rating() or 0, reverse=True)
 
 
         # Return the top 10 products
@@ -844,7 +844,7 @@ class BestSellerProductsAPIView(generics.ListAPIView):
             queryset = queryset.exclude(price_AED=0)        
 
         # Sort products based on sales count (orders)
-        queryset = sorted(queryset, key=lambda p: p.orders(), reverse=True)
+        queryset = sorted(queryset, key=lambda p: p.orders() or 0 , reverse=True)
 
 
         # Return the top 10 products
