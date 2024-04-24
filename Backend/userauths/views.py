@@ -1,5 +1,5 @@
 from django.shortcuts import render
-
+from django.conf import settings
 from .models import User, Profile
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializer import MyTokenObtainPairSerializer ,RegisterSerializer, UserSerializer,ProfileSerializer
@@ -71,6 +71,28 @@ def generate_otp():
     unique_key = uuid_key[:6]
     return unique_key
 
+# class PasswordRestEmailVerify(generics.RetrieveAPIView):
+#     serializer_class = UserSerializer
+#     permission_classes = (AllowAny, )
+
+#     def get_object(self):
+#         email = self.kwargs['email']
+#         user = User.objects.get(email=email)
+
+#         if user:
+#             user.otp= generate_otp()
+#             user.save()
+
+#             uidb64 = user.pk
+#             otp = user.otp
+
+#             link = f"http://localhost:5173/create-new-password?otp={otp}&uidb64={uidb64}"
+#             print(link)
+
+#         return user   
+
+from django.core.mail import send_mail
+from django.urls import reverse
 class PasswordRestEmailVerify(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     permission_classes = (AllowAny, )
@@ -87,9 +109,24 @@ class PasswordRestEmailVerify(generics.RetrieveAPIView):
             otp = user.otp
 
             link = f"http://localhost:5173/create-new-password?otp={otp}&uidb64={uidb64}"
-            print(link)
+            # print(link)
+            #link = reverse('create-new-password') + f'?otp={otp}&uidb64={uidb64}'
+
+            email_subject = 'Reset Your Password'
+            email_body = f'Please follow this link to reset your password: {link}'
+
+            send_mail(
+                email_subject,
+                email_body,
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+            )
+
+            
 
         return user    
+
 
 class PasswordChangeView(generics.CreateAPIView):
     serializer_class = UserSerializer
