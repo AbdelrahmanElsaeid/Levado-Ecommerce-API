@@ -7,6 +7,9 @@ from rest_framework.permissions import AllowAny
 from userauths.models import User
 from decimal import Decimal
 from rest_framework.response import Response
+from django.http import Http404
+from django.conf import settings
+from django.shortcuts import get_object_or_404
 # Create your views here.
 
 class OrderAPIView(generics.ListAPIView):
@@ -37,40 +40,7 @@ class OrderDetailAPIView(generics.RetrieveAPIView):
     
 
 
-# class WishlistCreateAPIView(generics.CreateAPIView):
-#     serializer_class = WishlistSerializer
-#     permission_classes = (AllowAny, )
 
-#     def create(self, request):
-#         payload = request.data 
-
-#         product_id = payload['product_id']
-#         user_id = payload['user_id']
-
-#         user = User.objects.get(id=user_id)
-#         wishlist_data = Wishlist.objects.filter(user=user,)
-#         serialized_wishlist_data = self.serializer_class(wishlist_data, many=True).data
-
-#         try:
-#             product = Product.objects.get(id=product_id)
-#             user = User.objects.get(id=user_id)
-#         except (Product.DoesNotExist, User.DoesNotExist):
-#             return Response({"message": "User or Product does not exist"}, status=status.HTTP_404_NOT_FOUND)
-
-#         wishlist_exists = Wishlist.objects.filter(product=product, user=user).exists()
-#         if wishlist_exists:
-#             Wishlist.objects.filter(product=product, user=user).delete()
-#             user_wishlist = Wishlist.objects.filter(user=user)
-#             serialized_wishlist = self.serializer_class(user_wishlist, many=True).data
-#             return Response({"message": "Removed From Wishlist", "wishlist": serialized_wishlist, "data": serialized_wishlist_data}, status=status.HTTP_200_OK)
-#         else:
-#             wishlist = Wishlist.objects.create(product=product, user=user)
-#             user_wishlist = Wishlist.objects.filter(user=user)
-#             serialized_wishlist = self.serializer_class(user_wishlist, many=True).data
-#             return Response({"message": "Added To Wishlist", "wishlist": serialized_wishlist, "data": serialized_wishlist_data}, status=status.HTTP_201_CREATED)
-
-from django.conf import settings
-from django.shortcuts import get_object_or_404
 class WishlistCreateAPIView(generics.CreateAPIView):
     serializer_class = WishlistListSerializer
     permission_classes = (AllowAny, )
@@ -139,18 +109,43 @@ class WishlistCreateAPIView(generics.CreateAPIView):
             return Response({"message": "Get Wishlist", "wishlist": wishlist_product_ids, "data": serialized_wishlist}, status=status.HTTP_200_OK )
 
 
-
+from django.db.models import F, FloatField, ExpressionWrapper
+from django.db.models.functions import Coalesce
 
 class WishlistAPIView(generics.ListAPIView):
     serializer_class = WishlistListSerializer
     permission_classes = (AllowAny, )
 
+   
     def get_queryset(self):
-        user_id = self.kwargs['user_id']
-        user = User.objects.get(id=user_id)
-        wishlist = Wishlist.objects.filter(user=user,)
-        return wishlist
-    
+            user_id = self.kwargs['user_id']
+            currency_code = self.kwargs.get('currency')
+
+            user = User.objects.get(id=user_id)
+            queryset = Wishlist.objects.filter(user=user)
+
+            if currency_code not in ['EGP', 'AED']:
+                raise Http404("Invalid currency code")
+
+            if currency_code == 'EGP':
+                price_field = 'product__price_EGP'
+            else:
+                price_field = 'product__price_AED'
+
+            # Annotate each product with the converted price based on the selected currency
+            queryset = queryset.annotate(
+                price=ExpressionWrapper(
+                    Coalesce(F(price_field), 0),
+                    output_field=FloatField()
+                )
+            )
+
+            return queryset
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['currency_code'] = self.kwargs.get('currency')
+        return context 
+        
 
 
 

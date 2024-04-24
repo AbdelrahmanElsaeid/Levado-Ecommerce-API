@@ -1,3 +1,4 @@
+from decimal import Decimal
 from rest_framework import serializers
 
 from userauths.serializer import ProfileReviewSerializer, ProfileSerializer
@@ -270,8 +271,8 @@ class WishlistSerializer(serializers.ModelSerializer):
 
 
 class WishlistListSerializer(serializers.ModelSerializer):
-    # product = serializers.StringRelatedField()
     user = serializers.StringRelatedField()
+
 
     class Meta:
         model = Wishlist
@@ -285,6 +286,34 @@ class WishlistListSerializer(serializers.ModelSerializer):
         else:
             self.Meta.depth = 3
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        product_representation = representation.pop('product')
+        currency_code = self.context.get('currency_code')
+
+        # Check if converted_price exists in the product representation
+        if 'price' in product_representation:
+            representation['price'] = product_representation['price']
+
+        if currency_code == 'EGP':
+            price = product_representation.get('price_EGP')
+        elif currency_code == 'AED':
+            price = product_representation.get('price_AED')
+        else:
+            price = None
+
+        # Set converted_price to price based on currency code
+        product_representation['price'] = Decimal(price)
+        product_representation['currency'] = currency_code
+
+        # Remove price_EGP and price_AED fields
+        product_representation.pop('price_EGP', None)
+        product_representation.pop('price_AED', None)
+
+        representation['product'] = product_representation
+        return representation        
+
+    
 
 
 class CouponSerializer(serializers.ModelSerializer):
