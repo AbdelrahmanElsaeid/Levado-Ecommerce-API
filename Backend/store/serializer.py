@@ -303,7 +303,11 @@ class WishlistListSerializer(serializers.ModelSerializer):
             price = None
 
         # Set converted_price to price based on currency code
-        product_representation['price'] = Decimal(price)
+        if price is not None:
+            product_representation['price'] = Decimal(price)
+        else:
+            product_representation['price'] = None
+        #product_representation['price'] = Decimal(price)
         product_representation['currency'] = currency_code
 
         # Remove price_EGP and price_AED fields
