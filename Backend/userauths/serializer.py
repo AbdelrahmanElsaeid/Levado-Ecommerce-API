@@ -4,10 +4,34 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from django.db import IntegrityError
 from django.conf import settings
-
-
 from .models import User, Profile
 from django.contrib.auth.password_validation import validate_password
+from rest_framework_simplejwt.exceptions import AuthenticationFailed
+from django.contrib.auth import authenticate
+
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(max_length=128, style={"input_type": "password"})
+
+    # def validate(self, attrs):
+    #     email = attrs.get("email")
+    #     password = attrs.get("password")
+
+    #     if email and password:
+    #         user = authenticate(request=self.context.get("request"), email=email, password=password)
+
+    #         if not user:
+    #             msg = "Unable to log in with provided credentials."
+    #             raise serializers.ValidationError(msg, code="authorization")
+
+    #     else:
+    #         msg = "Must include 'email' and 'password'."
+    #         raise serializers.ValidationError(msg, code="authorization")
+
+    #     attrs["user"] = user
+    #     return attrs
+
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -24,6 +48,9 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             token['vendor_id'] = 0
 
         return token 
+    
+    
+    
     
     
 
@@ -63,35 +90,33 @@ class RegisterSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         self.validate_full_name_and_phone(attrs)
         if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({'message': 'Password does not match'})
-            #return Response({'Message': 'Password does not match'}, status=status.HTTP_400_BAD_REQUEST)
-
-    
-        
-        
+            raise serializers.ValidationError({"status": "error", "message":"Password does not match"})
         return attrs
         
       
+    def create(self, validated_data):
+        value=validated_data['email'],
 
-
-    # def create(self, validated_data):
-    #     value=validated_data['email'],
-
-    #     if User.objects.filter(email=value).exists():
-    #         return Response({'Message': 'This email is already in use.'}, status=status.HTTP_400_BAD_REQUEST)
+        if User.objects.filter(email=value).exists():
+            return Response({'Message': 'This email is already used'}, status=status.HTTP_200_OK)
        
-    #     else:
-    #         user = User.objects.create(
-    #             full_name=validated_data['full_name'],
-    #             email=validated_data['email'],
-    #             phone=validated_data['phone'], 
-    #         )  
-    #         email_user,_ = user.email.split("@")
-    #         user.username = email_user
-    #         user.set_password(validated_data['password'])
+        else:
+            user = User.objects.create(
+                full_name=validated_data['full_name'],
+                email=validated_data['email'],
+                phone=validated_data['phone'], 
+            )  
+            email_user,_ = user.email.split("@")
+            try:
+                user.username = email_user
+                print(f"email useername--------- {email_user}")
+            except:
+                Response({'Message': 'This email is already used'}, status=status.HTTP_200_OK)
 
-    #         user.save()
-    #         return user     
+            user.set_password(validated_data['password'])
+
+            user.save()
+            return user     
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -115,7 +140,6 @@ class ProfileSerializer(serializers.ModelSerializer):
         return response   
     
 
-from django.conf import settings
 
 class ProfileReviewSerializer(serializers.ModelSerializer):
     

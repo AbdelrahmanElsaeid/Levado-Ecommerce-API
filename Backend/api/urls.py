@@ -10,9 +10,13 @@ urlpatterns = [
     path('user/token/', userauths_views.MyTokenOptainPairView.as_view()),
     path('user/token/refresh/', TokenRefreshView.as_view()),
     path('user/register/', userauths_views.RegisterView.as_view()),
-    path('user/password-reset/<email>/', userauths_views.PasswordRestEmailVerify.as_view()),
+    path('user/password-reset/', userauths_views.PasswordRestEmailVerify.as_view()),
     path('user/password-change/', userauths_views.PasswordChangeView.as_view()),
     path('user/profile/<user_id>/', userauths_views.ProfileView.as_view()),
+
+    path('user/login/', userauths_views.LoginView.as_view()),
+    path('user/csr/', userauths_views.get_csrf_token),
+
 
     # Store Endpoint
     path('productss/<currency>/', store_views.Fpro.as_view()),

@@ -218,3 +218,16 @@ STRIPE_SECRET_KEY="sk_test_51NREMBEsOc8lzOUUiDDjXPZjN4x9qDKdAq58aT6VjUz23kl1VyLW
 
 
 BASE_URL="https://levado-ecommerce-api.onrender.com",
+
+
+
+
+# Email configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = '587'
+EMAIL_HOST_USER = 'abdelrahmanelsaeid5@gmail.com'
+EMAIL_HOST_PASSWORD = 'rpjeagymlhppcazl'
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'foodOnline Marketplace <abdelrahmanelsaeid5@gmail.com>'
+

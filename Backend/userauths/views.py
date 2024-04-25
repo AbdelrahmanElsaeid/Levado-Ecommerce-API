@@ -2,14 +2,71 @@ from django.shortcuts import render
 from django.conf import settings
 from .models import User, Profile
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializer import MyTokenObtainPairSerializer ,RegisterSerializer, UserSerializer,ProfileSerializer
+from .serializer import MyTokenObtainPairSerializer ,RegisterSerializer, UserSerializer,ProfileSerializer,LoginSerializer
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.response import Response
 import random
 import shortuuid
+from django.core.mail import send_mail
+from django.urls import reverse
+from rest_framework_simplejwt.exceptions import AuthenticationFailed
+from django.contrib.auth import login, logout
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.views import APIView
+import jwt, datetime
+from django.views.decorators.csrf import get_token
+from django.http import JsonResponse
 
-# Create your views here.
+
+def get_csrf_token(request):
+    csrf_token = get_token(request)
+    return JsonResponse({'csrfToken': csrf_token})
+
+class LoginView(APIView):
+    def post(self, request):
+        email = request.data['email']
+        password = request.data['password']
+
+        user = User.objects.filter(email=email).first()
+
+        if user is None:
+            #aise AuthenticationFailed('User not found!')
+            return Response({"status": "Error","message": "Invalid Email or password"}, status=status.HTTP_200_OK)
+
+        if not user.check_password(password):
+            #raise AuthenticationFailed('Incorrect password!')
+            return Response({"status": "Error","message": "Invalid Email or password"}, status=status.HTTP_200_OK)
+
+        refresh = RefreshToken.for_user(user)
+
+
+        # Add additional data to the access token payload
+        refresh.payload['full_name'] = user.full_name
+        refresh.payload['email'] = user.email
+        refresh.payload['username'] = user.username
+        refresh.payload['vendor_id'] = user.vendor.id if hasattr(user, 'vendor') else 0
+
+    
+
+        return Response({
+            'status': 'success', 
+            'message': 'login successfully',
+            "tokens":{ 
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            }
+            
+        }, status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
+
 
 
 class MyTokenOptainPairView(TokenObtainPairView):
@@ -30,10 +87,12 @@ class MyTokenOptainPairView(TokenObtainPairView):
                 # Add more user information as needed
             }
         }
+
+    
         return Response(response_data)
+        #return Response(response_data)
 
-
-
+    
     
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -44,16 +103,21 @@ class RegisterView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         email = request.data.get('email')
 
+        email_user, _ = email.split("@")
+
         if User.objects.filter(email=email).exists():
-            #return Response({'message': 'This email is already in use.'}, status=status.HTTP_400_BAD_REQUEST)
             return Response({'status': 'error','message': 'This email is already used.'}, status=status.HTTP_200_OK)
+        
+        if User.objects.filter(username=email_user).exists(): 
+        
+            return Response({'status': 'error','message': 'This email is already used.'}, status=status.HTTP_200_OK)
+        
 
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        #return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         return Response({'message': 'User created successfully.', 'status': 'success', 'data': serializer.data}, status=status.HTTP_201_CREATED, headers=headers)
 
     
@@ -64,8 +128,9 @@ class RegisterView(generics.CreateAPIView):
             full_name=serializer.validated_data['full_name'],
             email=email,
             phone=serializer.validated_data['phone'], 
-        )  
+        )
         email_user, _ = email.split("@")
+                
         user.username = email_user
         user.set_password(serializer.validated_data['password'])
         user.save()
@@ -82,34 +147,17 @@ def generate_otp():
     unique_key = uuid_key[:6]
     return unique_key
 
-# class PasswordRestEmailVerify(generics.RetrieveAPIView):
-#     serializer_class = UserSerializer
-#     permission_classes = (AllowAny, )
+  
 
-#     def get_object(self):
-#         email = self.kwargs['email']
-#         user = User.objects.get(email=email)
 
-#         if user:
-#             user.otp= generate_otp()
-#             user.save()
-
-#             uidb64 = user.pk
-#             otp = user.otp
-
-#             link = f"http://localhost:5173/create-new-password?otp={otp}&uidb64={uidb64}"
-#             print(link)
-
-#         return user   
-
-from django.core.mail import send_mail
-from django.urls import reverse
 class PasswordRestEmailVerify(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     permission_classes = (AllowAny, )
 
     def get_object(self):
-        email = self.kwargs['email']
+        #email = self.kwargs['email']
+        email=self.request.data['email']
+        print(f"eeeeeeeee   {email}")
         user = User.objects.get(email=email)
 
         if user:
@@ -119,7 +167,7 @@ class PasswordRestEmailVerify(generics.RetrieveAPIView):
             uidb64 = user.pk
             otp = user.otp
 
-            link = f"http://localhost:5173/create-new-password?otp={otp}&uidb64={uidb64}"
+            link = f"https://levado.netlify.app/create-new-password?otp={otp}&uidb64={uidb64}"
             # print(link)
             #link = reverse('create-new-password') + f'?otp={otp}&uidb64={uidb64}'
 
@@ -149,6 +197,10 @@ class PasswordChangeView(generics.CreateAPIView):
         otp = payload['otp']
         uidb64 = payload['uidb64']
         password = payload['password']
+        password2 = payload['password2']
+        if password != password2:
+            return Response({"status": "error", "message":"Password does not match"}, status=status.HTTP_200_OK)
+
 
         user = User.objects.get(otp=otp, id=uidb64)
 
