@@ -641,8 +641,8 @@ class StripeCheckoutView(generics.CreateAPIView):
                     }
                 ],
                 mode='payment',
-                success_url ='http://localhost:4200/payment-success/' + order.oid + '?session_id={CHECKOUT_SESSION_ID}',
-                cancel_url ='http://localhost:4200/payment-failed/?session_id={CHECKOUT_SESSION_ID'
+                success_url ='https://levado.netlify.app/payment-success/' + order.oid + '?session_id={CHECKOUT_SESSION_ID}',
+                cancel_url ='https://levado.netlify.app/payment-failed/?session_id={CHECKOUT_SESSION_ID'
 
             )
 
