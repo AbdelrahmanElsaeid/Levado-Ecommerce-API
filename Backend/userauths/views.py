@@ -162,7 +162,7 @@ class PasswordRestEmailVerify(generics.CreateAPIView):
             user = User.objects.get(email=email)
         except:
             
-            return Response({"status": "error", "message":"This Email isn't exist"}, status=status.HTTP_400_BAD_REQUEST)     
+            return Response({"status": "error", "message":"This Email isn't exist"}, status=status.HTTP_200_OK)     
 
         if user:
             user.otp= generate_otp()

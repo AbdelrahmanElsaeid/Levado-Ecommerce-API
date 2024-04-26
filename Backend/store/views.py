@@ -613,12 +613,11 @@ class StripeCheckoutView(generics.CreateAPIView):
         order_oid = self.kwargs['order_oid']
         cart_id = self.kwargs['cart_id']
 
-        print(f"cart id is----------{cart_id}")
+        link_url = self.request.data['link']
+
         order = CartOrder.objects.get(oid=order_oid)
 
-        #carts = Cart.objects.filter(cart_id=cart_id)
-
-        #print(f"carts  is----------{carts}")
+      
 
 
         if not order:
@@ -641,8 +640,13 @@ class StripeCheckoutView(generics.CreateAPIView):
                     }
                 ],
                 mode='payment',
-                success_url ='https://levado.netlify.app/payment-success/' + order.oid + '?session_id={CHECKOUT_SESSION_ID}',
-                cancel_url ='https://levado.netlify.app/payment-failed/?session_id={CHECKOUT_SESSION_ID'
+                # success_url ='https://levado.netlify.app/payment-success/' + order.oid + '?session_id={CHECKOUT_SESSION_ID}',
+                # cancel_url ='https://levado.netlify.app/payment-failed/?session_id={CHECKOUT_SESSION_ID}'
+
+                success_url = f'{link_url}/payment-success/{order.oid}?session_id={{CHECKOUT_SESSION_ID}}',
+                cancel_url = f'{link_url}/payment-failed/?session_id={{CHECKOUT_SESSION_ID}}'
+
+                
 
             )
 
