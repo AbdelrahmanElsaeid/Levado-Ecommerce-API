@@ -150,15 +150,19 @@ def generate_otp():
   
 
 
-class PasswordRestEmailVerify(generics.RetrieveAPIView):
+class PasswordRestEmailVerify(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = (AllowAny, )
 
-    def get_object(self):
+    def create(self, request, *args, **kwargs):
         #email = self.kwargs['email']
         email=self.request.data['email']
-        print(f"eeeeeeeee   {email}")
-        user = User.objects.get(email=email)
+        link_url = self.request.data['link']
+        try:
+            user = User.objects.get(email=email)
+        except:
+            
+            return Response({"status": "error", "message":"This Email isn't exist"}, status=status.HTTP_400_BAD_REQUEST)     
 
         if user:
             user.otp= generate_otp()
@@ -167,7 +171,7 @@ class PasswordRestEmailVerify(generics.RetrieveAPIView):
             uidb64 = user.pk
             otp = user.otp
 
-            link = f"https://levado.netlify.app/create-new-password?otp={otp}&uidb64={uidb64}"
+            link = f"{link_url}/create-new-password?otp={otp}&uidb64={uidb64}"
             # print(link)
             #link = reverse('create-new-password') + f'?otp={otp}&uidb64={uidb64}'
 
@@ -181,10 +185,11 @@ class PasswordRestEmailVerify(generics.RetrieveAPIView):
                 [email],
                 fail_silently=False,
             )
+           
 
             
 
-        return user    
+        return Response({'status':'success','message': "Link Was sent in email Successfully"}, status=status.HTTP_201_CREATED)    
 
 
 class PasswordChangeView(generics.CreateAPIView):
