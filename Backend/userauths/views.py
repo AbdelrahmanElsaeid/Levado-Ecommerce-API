@@ -189,7 +189,7 @@ class PasswordRestEmailVerify(generics.CreateAPIView):
 
             
 
-        return Response({'status':'success','message': "Link Was sent in email Successfully"}, status=status.HTTP_201_CREATED)    
+        return Response({'status':'success','message': "Check Your Email"}, status=status.HTTP_201_CREATED)    
 
 
 class PasswordChangeView(generics.CreateAPIView):
