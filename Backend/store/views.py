@@ -76,7 +76,7 @@ class ProductBrandListAPIView(generics.ListAPIView):
             raise Http404("Invalid currency code")
 
         if name:
-            brand = Brand.objects.get(title=name)
+            brand = Brand.objects.get(title_en=name)
             queryset = Product.objects.filter(brand=brand)
         else:
             queryset = Product.objects.all()
@@ -116,7 +116,7 @@ class ProductCategory(generics.ListAPIView):
             raise Http404("Invalid currency code")
 
         if name:
-            category = Category.objects.get(title=name)
+            category = Category.objects.get(title_en=name)
             queryset = Product.objects.filter(category=category)
         else:
             queryset = Product.objects.all()
@@ -130,6 +130,7 @@ class ProductCategory(generics.ListAPIView):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['currency_code'] = self.kwargs.get('currency')
+        #context['request'] = self.request
         return context 
 
 

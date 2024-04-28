@@ -155,6 +155,7 @@ class ProductListSerializer(serializers.ModelSerializer):
         if language == 'ar':
             return obj.category.title_ar if obj.category else None
         return obj.category.title_en if obj.category else None
+    
 
     def get_brand(self, obj):
         request = self.context.get('request')
