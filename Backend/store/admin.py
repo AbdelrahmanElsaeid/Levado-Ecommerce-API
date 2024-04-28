@@ -20,14 +20,14 @@ class SizeInline(admin.TabularInline):
 #     extra=0           
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display=['id','title','category','brand','shipping_amount','stock_qty','in_stock','vendor','featured']
+    list_display=['id','title_en','category','brand','shipping_amount','stock_qty','in_stock','vendor','featured']
     list_editable=['featured']
     list_filter=['date']
     search_fields=['title']
     inlines = [GalleryInline, ColorInline,SizeInline,SpecificationInline]
 
 class BrandAdmin(admin.ModelAdmin):
-    list_display=['id','title']
+    list_display=['id','title_en']
 
 
 admin.site.register(Product,ProductAdmin)

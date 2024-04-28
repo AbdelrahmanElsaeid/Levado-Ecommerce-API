@@ -6,28 +6,39 @@ from django.utils.text import slugify
 from django.utils import timezone
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from unidecode import unidecode
 
 # Create your models here.
 class Brand(models.Model):
-    title = models.CharField(max_length=100)
+    title_en = models.CharField(max_length=100)
+    title_ar = models.CharField(max_length=100,null=True, blank=True)
+    #title = models.CharField(max_length=100)
     image = models.FileField(upload_to="brand", default="brand.jpg", null=True, blank=True)    
     slug = models.SlugField(unique=True)
 
     def __str__(self):
-        return self.title
+        if self.title_en:
+            return self.title_en
+        if self.title_ar:
+            return self.title_ar
 
 class Category(models.Model):
-    title = models.CharField(max_length=100)
+    title_en = models.CharField(max_length=100)
+    title_ar = models.CharField(max_length=100,null=True, blank=True)
+    #title = models.CharField(max_length=100)
     image = models.FileField(upload_to="category", default="category.jpg", null=True, blank=True)
     active = models.BooleanField(default=True)
     slug = models.SlugField(unique=True)
 
     def __str__(self):
-        return self.title
+        if self.title_en:
+            return self.title_en
+        if self.title_ar:
+            return self.title_ar
     
     class Meta:
         verbose_name_plural="Category"
-        ordering = ['title']
+        #ordering = ['title']
 
 class Product(models.Model):
 
@@ -37,9 +48,13 @@ class Product(models.Model):
         ("in_review","in_review"),
         ("published","published"),
     )
-    title = models.CharField(max_length=100)
+    title_en = models.CharField(max_length=100)
+    title_ar = models.CharField(max_length=100,null=True, blank=True)
+    description_en = models.TextField(null=True, blank=True)
+    description_ar = models.TextField(null=True, blank=True)
+    #title = models.CharField(max_length=100)
     image = models.FileField(upload_to="product",default="product.jpg", null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
+    #description = models.TextField(null=True, blank=True)
     category= models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
     brand= models.ForeignKey(Brand, on_delete=models.CASCADE, null=True, blank=True)
     price_EGP = models.DecimalField(decimal_places=2, max_digits=12, default=0.00 , null=True, blank=True)
@@ -68,7 +83,10 @@ class Product(models.Model):
     #     super(Product,self).save(*args,**kwargs)
 
     def __str__(self):
-        return self.title
+        if self.title_en:
+            return self.title_en
+        if self.title_ar:
+            return self.title_ar
     
     def product_rating(self):
         product_rating = Review.objects.filter(product=self).aggregate(avg_rating=models.Avg("rating"))
@@ -88,23 +106,27 @@ class Product(models.Model):
     def orders(self):
         return CartOrderItem.objects.filter(product=self).count()
     
-    def save(self,*args, **kwargs):
-        #if self.slug == "" or self.slug== None:
-        self.slug =slugify(self.title)
+    # def save(self,*args, **kwargs):
+    #     #if self.slug == "" or self.slug== None:
+    #     if self.title_en:
+    #         self.slug =slugify(self.title_en)
+    #     if self.title_ar:
+    #         self.slug =slugify(self.title_ar)    
+    #     self.rating = self.product_rating()
+    #     super(Product, self).save(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        # Generate slug from English title if available
+        if self.title_en and (not self.slug or self.title_en != self.title_ar):
+            self.slug = slugify(self.title_en)
+        # If English title is not available, generate slug from Arabic title
+        elif self.title_ar and (not self.slug or self.title_ar != self.title_en):
+            self.slug = slugify(unidecode(self.title_ar))
+        # Calculate rating
         self.rating = self.product_rating()
-        super(Product, self).save(*args, **kwargs)
+        super(Product, self).save(*args, **kwargs)    
 
-# class Prices(models.Model):
-#     CURRENCY_CHOICES = (
-#         ('AED', 'AED'),
-#         ('EGP', 'EGP'),
-#         )
-#     product = models.ForeignKey(Product,related_name="productprice" ,on_delete=models.CASCADE)
-#     currency = models.CharField(max_length=5, choices=CURRENCY_CHOICES) 
-#     price = models.DecimalField(decimal_places=2, max_digits=12)
 
-#     class Meta:
-#         unique_together = ('product', 'currency')
 
 class Gallery(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
@@ -117,38 +139,64 @@ class Gallery(models.Model):
         verbose_name_plural="Product Images"
 
     def __str__(self):
-        return self.product.title
+        if self.product.title_en:
+            return self.product.title_en
+        if self.product.title_ar:
+            return self.product.title_ar
     
 
 class Specification(models.Model):
+    title_en = models.CharField(max_length=100,null=True, blank=True)
+    title_ar = models.CharField(max_length=100,null=True, blank=True)
+    content_en = models.TextField(null=True, blank=True)
+    content_ar = models.TextField(null=True, blank=True)
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
-    title = models.CharField(max_length=1000)
-    content=models.CharField(max_length=1000)
+    #title = models.CharField(max_length=1000)
+    #content=models.CharField(max_length=1000)
     date=models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.title
+        if self.title_en:
+            return self.title_en
+        if self.title_ar:
+            return self.title_ar
+        else:
+            return "spe"
 
 
 class Size(models.Model):
+    name_en = models.CharField(max_length=100,null=True, blank=True)
+    name_ar = models.CharField(max_length=100,null=True, blank=True)
     product = models.ForeignKey(Product,related_name="size_product", on_delete=models.SET_NULL, null=True)
-    name = models.CharField(max_length=1000)
+    #name = models.CharField(max_length=1000)
     price = models.DecimalField(decimal_places=2, max_digits=12, default=0.00)
     date=models.DateTimeField(auto_now_add=True)
 
 
     def __str__(self):
-        return self.name
+        if self.name_en:
+            return self.name_en
+        if self.name_ar:
+            return self.name_ar
+        else:
+            return "size"
    
 
 class Color(models.Model):
     product = models.ForeignKey(Product,related_name="color_product", on_delete=models.SET_NULL, null=True)
-    name = models.CharField(max_length=1000)
+    #name = models.CharField(max_length=1000)
     color_code = models.CharField(max_length=1000)
+    name_en = models.CharField(max_length=100,null=True, blank=True)
+    name_ar = models.CharField(max_length=100,null=True, blank=True)
 
 
     def __str__(self):
-        return self.name
+        if self.name_en:
+            return self.name_en
+        if self.name_ar:
+            return self.name_ar
+        else:
+            return "color"
    
 
 
@@ -158,6 +206,7 @@ class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     qty = models.PositiveIntegerField(default=0, null=True, blank=True)
     price = models.DecimalField(decimal_places=2, max_digits=12, default=0.00, null=True, blank=True)
+    currency = models.CharField(max_length=50, null=True, blank=True)
     sub_total = models.DecimalField(decimal_places=2, max_digits=12, default=0.00, null=True, blank=True)
     shipping_amount = models.DecimalField(decimal_places=2, max_digits=12, default=0.00, null=True, blank=True)
     service_fee = models.DecimalField(decimal_places=2, max_digits=12, default=0.00, null=True, blank=True)
@@ -170,7 +219,10 @@ class Cart(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.cart_id} - {self.product.title}'
+        if self.product.title_en:
+            return f'{self.cart_id} - {self.product.title_en}'
+        if self.product.title_ar:
+            return f'{self.cart_id} - {self.product.title_ar}'
     
 
 
@@ -216,6 +268,7 @@ class CartOrder(models.Model):
     city = models.CharField(max_length=1000, null=True, blank=True)
     state = models.CharField(max_length=1000, null=True, blank=True)
     country = models.CharField(max_length=1000, null=True, blank=True)
+    currency = models.CharField(max_length=50, null=True, blank=True)
 
     stripe_session_id = models.CharField(max_length=1000, null=True, blank=True)
     cart_order_id = models.CharField(max_length=1000, null=True, blank=True)
@@ -246,6 +299,7 @@ class CartOrderItem(models.Model):
     color = models.CharField(max_length=100, null=True, blank=True)
     size = models.CharField(max_length=100, null=True, blank=True)
     price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    currency = models.CharField(max_length=50, null=True, blank=True)
     country = models.CharField(max_length=1000, null=True, blank=True)
 
     sub_total = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, help_text="Total of Product price * Product Qty")
@@ -305,8 +359,11 @@ class Review(models.Model):
         ordering = ["-date"]
         
     def __str__(self):
-        if self.product:
-            return self.product.title
+        
+        if self.product.title_en:
+            return self.product.title_en
+        if self.product.title_ar:
+            return self.product.title_ar
         else:
             return "Review"
 
@@ -327,8 +384,10 @@ class Wishlist(models.Model):
         verbose_name_plural = "Wishlist"
     
     def __str__(self):
-        if self.product.title:
-            return self.product.title
+        if self.product.title_en:
+            return self.product.title_en
+        if self.product.title_ar:
+            return self.product.title_ar
         else:
             return "Wishlist"
         

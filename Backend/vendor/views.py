@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from .models import Vendor
-from store.serializer import SummarySerializer, ProductSerializer,CartOrderItemSerializer,CartOrderSerializer, EarningSerializer, ReviewSerializer,CouponSerializer,CouponSummarySerializer,NotificationSerializer,NotificationSummarySerializer,VendorSerializer, ColorSerializer,SpecificationSerializer,SizeSerializer,GallerySerializer,ProductAddSerializer
+from store.serializer import SummarySerializer, ProductSerializer,CartOrderItemSerializer,CartOrderSerializer, EarningSerializer, ReviewSerializer,CouponSerializer,CouponSummarySerializer,NotificationSerializer,NotificationSummarySerializer,VendorSerializer, ColorSerializer,SpecificationSerializer,SizeSerializer,GallerySerializer,ProductAddSerializer,ColorAddSerializer,SizeAddSerializer,SpecificationAddSerializer
 from django.shortcuts import render,redirect
 from store.models import Category,Product,Cart,Tax,CartOrder,CartOrderItem,Coupon,Notification,Review
 from rest_framework import generics,status
@@ -10,7 +10,7 @@ from rest_framework.permissions import AllowAny
 from userauths.models import User,Profile
 from userauths.serializer import ProfileSerializer
 from django.db import transaction
-
+from django.conf import settings
 from decimal import Decimal
 from rest_framework.response import Response
 from django.db import models
@@ -400,39 +400,45 @@ class ProductCreateView(generics.CreateAPIView):
         colors_data = []
         sizes_data = []
         gallery_data = []
-        print(f"paylod issss  -----------")
-        # Loop through the keys of self.request.data
+        # Loop through the keys of self.request.data      
         for key, value in self.request.data.items():
             # Example key: specifications[0][title]
-            if key.startswith('specifications') and '[title]' in key:
+            if key.startswith('specifications') and '[title_en]' in  key:
+            
                 # Extract index from key
                 index = key.split('[')[1].split(']')[0]
-                title = value
-                content_key = f'specifications[{index}][content]'
-                content = self.request.data.get(content_key)
+                
+                title_en = self.request.data.get(f'specifications[{index}][title_en]')
+                title_ar = self.request.data.get(f'specifications[{index}][title_ar]')
+                content_en = self.request.data.get(f'specifications[{index}][content_en]')
+                content_ar = self.request.data.get(f'specifications[{index}][content_ar]')
+
+
                 specifications_data.append(
-                    {'title': title, 'content': content})
+                    {'title_en': title_en,'title_ar': title_ar, 'content_en': content_en,'content_ar': content_ar})
 
             # Example key: colors[0][name]
-            elif key.startswith('colors') and '[name]' in key:
-                # Extract index from key
+            elif key.startswith('colors') and '[name_en]' in key:
+                
+
                 index = key.split('[')[1].split(']')[0]
-                name = value
-                color_code_key = f'colors[{index}][color_code]'
-                color_code = self.request.data.get(color_code_key)
-                image_key = f'colors[{index}][image]'
-                image = self.request.data.get(image_key)
-                colors_data.append(
-                    {'name': name, 'color_code': color_code, 'image': image})
+
+                name_en = self.request.data.get(f'colors[{index}][name_en]')                
+                name_ar = self.request.data.get(f'colors[{index}][name_ar]')
+                color_code = self.request.data.get(f'colors[{index}][color_code]')
+
+                colors_data.append({'name_en': name_en, 'name_ar': name_ar, 'color_code': color_code,})
 
             # Example key: sizes[0][name]
-            elif key.startswith('sizes') and '[name]' in key:
+            elif key.startswith('sizes') and '[name_en]' in key:
                 # Extract index from key
                 index = key.split('[')[1].split(']')[0]
-                name = value
+
+                name_en = self.request.data.get(f'sizes[{index}][name_en]')                
+                name_ar = self.request.data.get(f'sizes[{index}][name_ar]')
                 price_key = f'sizes[{index}][price]'
                 price = self.request.data.get(price_key)
-                sizes_data.append({'name': name, 'price': price})
+                sizes_data.append({'name_en': name_en, 'name_ar': name_ar, 'price': price})
 
             # Example key: gallery[0][image]
             elif key.startswith('gallery') and '[image]' in key:
@@ -442,16 +448,13 @@ class ProductCreateView(generics.CreateAPIView):
                 gallery_data.append({'image': image})
 
         # Log or print the data for debugging
-        print('specifications_data:', specifications_data)
-        print('colors_data:', colors_data)
-        print('sizes_data:', sizes_data)
-        print('gallery_data:', gallery_data)
+        
 
         # Save nested serializers with the product instance
         self.save_nested_data(
-            product_instance, SpecificationSerializer, specifications_data)
-        self.save_nested_data(product_instance, ColorSerializer, colors_data)
-        self.save_nested_data(product_instance, SizeSerializer, sizes_data)
+            product_instance, SpecificationAddSerializer, specifications_data)
+        self.save_nested_data(product_instance, ColorAddSerializer, colors_data)
+        self.save_nested_data(product_instance, SizeAddSerializer, sizes_data)
         self.save_nested_data(
             product_instance, GallerySerializer, gallery_data)
 
@@ -491,8 +494,7 @@ class ProductUpdateView(generics.RetrieveUpdateAPIView):
         self.perform_update(serializer)
 
         # Delete all existing nested data
-        print(f"prodcut color {product.color()}")
-        print(f"prodcut gallary {product.gallery()}")
+        
         product.specification().delete()
         product.color().delete()
         product.size().delete()
@@ -507,35 +509,42 @@ class ProductUpdateView(generics.RetrieveUpdateAPIView):
         # Loop through the keys of self.request.data
         for key, value in self.request.data.items():
             # Example key: specifications[0][title]
-            if key.startswith('specifications') and '[title]' in key:
+            if key.startswith('specifications') and '[title_en]' in  key:
+            
                 # Extract index from key
                 index = key.split('[')[1].split(']')[0]
-                title = value
-                content_key = f'specifications[{index}][content]'
-                content = self.request.data.get(content_key)
+                
+                title_en = self.request.data.get(f'specifications[{index}][title_en]')
+                title_ar = self.request.data.get(f'specifications[{index}][title_ar]')
+                content_en = self.request.data.get(f'specifications[{index}][content_en]')
+                content_ar = self.request.data.get(f'specifications[{index}][content_ar]')
+
+
                 specifications_data.append(
-                    {'title': title, 'content': content})
+                    {'title_en': title_en,'title_ar': title_ar, 'content_en': content_en,'content_ar': content_ar})
 
             # Example key: colors[0][name]
-            elif key.startswith('colors') and '[name]' in key:
-                # Extract index from key
+            elif key.startswith('colors') and '[name_en]' in key:
+                
+
                 index = key.split('[')[1].split(']')[0]
-                name = value
-                color_code_key = f'colors[{index}][color_code]'
-                color_code = self.request.data.get(color_code_key)
-                image_key = f'colors[{index}][image]'
-                image = self.request.data.get(image_key)
-                colors_data.append(
-                    {'name': name, 'color_code': color_code, 'image': image})
+
+                name_en = self.request.data.get(f'colors[{index}][name_en]')                
+                name_ar = self.request.data.get(f'colors[{index}][name_ar]')
+                color_code = self.request.data.get(f'colors[{index}][color_code]')
+
+                colors_data.append({'name_en': name_en, 'name_ar': name_ar, 'color_code': color_code,})
 
             # Example key: sizes[0][name]
-            elif key.startswith('sizes') and '[name]' in key:
+            elif key.startswith('sizes') and '[name_en]' in key:
                 # Extract index from key
                 index = key.split('[')[1].split(']')[0]
-                name = value
+
+                name_en = self.request.data.get(f'sizes[{index}][name_en]')                
+                name_ar = self.request.data.get(f'sizes[{index}][name_ar]')
                 price_key = f'sizes[{index}][price]'
                 price = self.request.data.get(price_key)
-                sizes_data.append({'name': name, 'price': price})
+                sizes_data.append({'name_en': name_en, 'name_ar': name_ar, 'price': price})
 
             # Example key: gallery[0][image]
             elif key.startswith('gallery') and '[image]' in key:
@@ -545,10 +554,7 @@ class ProductUpdateView(generics.RetrieveUpdateAPIView):
                 gallery_data.append({'image': image})
 
         # Log or print the data for debugging
-        print('specifications_data:', specifications_data)
-        print('colors_data:', colors_data)
-        print('sizes_data:', sizes_data)
-        print('gallery_data:', gallery_data)
+        
 
         # Save nested serializers with the product instance
         self.save_nested_data(
@@ -568,26 +574,10 @@ class ProductUpdateView(generics.RetrieveUpdateAPIView):
 
 
 
-# class ProductDeleteView(generics.DestroyAPIView):
-#     queryset = Product.objects.all()
-#     serializer_class = ProductAddSerializer
-
-#     def get_object(self):
-#         vendor_id = self.kwargs['vendor_id']
-#         product_pid = self.kwargs['product_pid']
-
-#         vendor = Vendor.objects.get(id=vendor_id)
-#         product = Product.objects.get(pid=product_pid, vendor=vendor)
-#         return product
-    
-#     def destroy(self, request, *args, **kwargs):
-#         instance = self.get_object()
-#         self.perform_destroy(instance)
-#         return Response({"status": "Success", "message": "Product deleted successfully."}, status=status.HTTP_200_OK)
 
 
 
-from django.conf import settings
+
 
 
 class ProductDeleteView(generics.DestroyAPIView):

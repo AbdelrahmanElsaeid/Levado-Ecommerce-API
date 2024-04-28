@@ -34,11 +34,23 @@ class CategoryListAPIView(generics.ListAPIView):
     serializer_class= CategorySerializer
     permission_classes = [AllowAny]
 
+    def get_serializer_context(self):
+        # Pass the request object to the serializer context
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
 
 class BrandListAPIView(generics.ListAPIView):
     queryset=Brand.objects.all()
     serializer_class= BrandSerializer
     permission_classes = [AllowAny] 
+
+    def get_serializer_context(self):
+        # Pass the request object to the serializer context
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
 
 class ProductBrandListAPIView(generics.ListAPIView):
@@ -264,6 +276,7 @@ class CartAPIView(generics.ListCreateAPIView):
         user_id=payload['user_id']
         qty=payload['qty']
         price=payload['price']
+        currency=payload['currency']
         shipping_amount=payload['shipping_amount']
         country=payload['country']
         size=payload['size']
@@ -292,6 +305,7 @@ class CartAPIView(generics.ListCreateAPIView):
             cart.product=product
             cart.qty=qty
             cart.price=price
+            cart.currency=currency
             cart.sub_total= Decimal(price) * int(qty)
             cart.shipping_amount = Decimal(shipping_amount) * int(qty)
             cart.tax_fee = int(qty) * Decimal(tax_rate)
@@ -314,6 +328,7 @@ class CartAPIView(generics.ListCreateAPIView):
             cart.product=product
             cart.qty=qty
             cart.price=price
+            cart.currency=currency
             cart.sub_total= Decimal(price) * int(qty)
             cart.shipping_amount = Decimal(shipping_amount) * int(qty)
             cart.tax_fee = int(qty) * Decimal(tax_rate)
@@ -502,6 +517,7 @@ class CreateOrderAPIView(generics.CreateAPIView):
                 vendor = c.product.vendor,
                 qty=c.qty,
                 price=c.price,
+                currency=c.currency,
                 sub_total= c.sub_total,
                 shipping_amount = c.shipping_amount,
                 tax_fee = c.tax_fee,

@@ -36,6 +36,7 @@ urlpatterns = [
     path('product/brand/<currency>/<str:brand>/',store_views.ProductBrandListAPIView.as_view()),
     path('product-popular/<currency>/',store_views.PopularProductsAPIView.as_view()),
     path('product-bestseller/<currency>/',store_views.BestSellerProductsAPIView.as_view()),
+    
     path('products/create/', store_views.ProductCreateAPIView.as_view()),
     path('products/update/<int:pk>/', store_views.ProductCreateAPIView.as_view()),
 

@@ -7,14 +7,32 @@ from vendor.models import Vendor
 
 
 class BrandSerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
     class Meta:
         model = Brand
-        fields = '__all__'
+        #fields = '__all__'
+        exclude = ['title_en', 'title_ar']
+
+    def get_title(self, obj):
+        request = self.context.get('request')
+        language = request.LANGUAGE_CODE if request else 'en'
+        if language == 'ar':
+            return obj.title_ar
+        return obj.title_en 
 
 class CategorySerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
     class Meta:
         model = Category
-        fields = '__all__'
+        #fields = '__all__'
+        exclude = ['title_en', 'title_ar']
+
+    def get_title(self, obj):
+        request = self.context.get('request')
+        language = request.LANGUAGE_CODE if request else 'en'
+        if language == 'ar':
+            return obj.title_ar
+        return obj.title_en    
 
 
 class GallerySerializer(serializers.ModelSerializer):
@@ -23,31 +41,66 @@ class GallerySerializer(serializers.ModelSerializer):
         fields = '__all__'        
 
 class SpecificationSerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
+    content = serializers.SerializerMethodField()
     class Meta:
         model = Specification
         fields = ['id','title','content']
 
+    def get_title(self, obj):
+        request = self.context.get('request')
+        language = request.LANGUAGE_CODE if request else 'en'
+        if language == 'ar':
+            return obj.title_ar
+        return obj.title_en    
+    
+    def get_content(self, obj):
+        request = self.context.get('request')
+        language = request.LANGUAGE_CODE if request else 'en'
+        if language == 'ar':
+            return obj.content_ar
+        return obj.content_en    
+
+
 class SizeSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
     class Meta:
         model = Size
-        fields = '__all__'
+        #fields = '__all__'
+        exclude = ['name_en', 'name_ar']
+
+    def get_name(self, obj):
+        request = self.context.get('request')
+        language = request.LANGUAGE_CODE if request else 'en'
+        if language == 'ar':
+            return obj.name_ar
+        return obj.name_en        
 
 class ColorSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
     class Meta:
         model = Color
-        fields = '__all__'
+        #fields = '__all__'
+        exclude = ['name_en', 'name_ar']
 
-# class PriceSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Prices
-#         fields = '__all__'
+    def get_name(self, obj):
+        request = self.context.get('request')
+        language = request.LANGUAGE_CODE if request else 'en'
+        if language == 'ar':
+            return obj.name_ar
+        return obj.name_en     
+
+
 
 class ProductListSerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
     
-    category = serializers.StringRelatedField()
-    brand = serializers.StringRelatedField()
+    #category = serializers.StringRelatedField()
+    #brand = serializers.StringRelatedField()
     price = serializers.SerializerMethodField()  
     currency = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+    brand = serializers.SerializerMethodField()
 
     
     class Meta:
@@ -87,18 +140,46 @@ class ProductListSerializer(serializers.ModelSerializer):
         elif currency_code == 'AED':
             return 'AED'
         else:
-            return None    
+            return None 
+
+    def get_title(self, obj):
+        request = self.context.get('request')
+        language = request.LANGUAGE_CODE if request else 'en'
+        if language == 'ar':
+            return obj.title_ar
+        return obj.title_en 
+
+    def get_category(self, obj):
+        request = self.context.get('request')
+        language = request.LANGUAGE_CODE if request else 'en'  
+        if language == 'ar':
+            return obj.category.title_ar if obj.category else None
+        return obj.category.title_en if obj.category else None
+
+    def get_brand(self, obj):
+        request = self.context.get('request')
+        language = request.LANGUAGE_CODE if request else 'en'  
+        if language == 'ar':
+            return obj.brand.title_ar if obj.brand else None
+        return obj.brand.title_en if obj.brand else None    
+
+         
 
 class ProductDetailSerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
     gallery = GallerySerializer(many=True)
     color = ColorSerializer(many=True)
     size = SizeSerializer(many=True)
     specification = SpecificationSerializer(many=True)
     vendor =serializers.StringRelatedField()
-    category = serializers.StringRelatedField()
-    brand = serializers.StringRelatedField()
+    #category = serializers.StringRelatedField()
+    #brand = serializers.StringRelatedField()
     price = serializers.SerializerMethodField()  
     currency = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+    brand = serializers.SerializerMethodField()
+
     
     class Meta:
         model = Product
@@ -149,7 +230,34 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         elif currency_code == 'AED':
             return 'AED'
         else:
-            return None     
+            return None
+
+    def get_title(self, obj):
+        request = self.context.get('request')
+        language = request.LANGUAGE_CODE if request else 'en'
+        if language == 'ar':
+            return obj.title_ar
+        return obj.title_en   
+
+    def get_description(self, obj):
+        request = self.context.get('request')
+        language = request.LANGUAGE_CODE if request else 'en'
+        if language == 'ar':
+            return obj.description_ar
+        return obj.description_en
+    def get_category(self, obj):
+        request = self.context.get('request')
+        language = request.LANGUAGE_CODE if request else 'en'  
+        if language == 'ar':
+            return obj.category.title_ar if obj.category else None
+        return obj.category.title_en if obj.category else None
+
+    def get_brand(self, obj):
+        request = self.context.get('request')
+        language = request.LANGUAGE_CODE if request else 'en'  
+        if language == 'ar':
+            return obj.brand.title_ar if obj.brand else None
+        return obj.brand.title_en if obj.brand else None        
     
     def __init__(self, *args, **kwargs):
         super(ProductDetailSerializer, self).__init__(*args, **kwargs)
@@ -167,6 +275,8 @@ class ProductFaqSerializer(serializers.ModelSerializer):
         model = ProductFaq
         fields = '__all__'
 
+    
+
     def __init__(self, *args, **kwargs):
         super(ProductFaqSerializer, self).__init__(*args, **kwargs)
         request = self.context.get('request')
@@ -182,13 +292,7 @@ class CartSerializer(serializers.ModelSerializer):
         model = Cart
         fields = '__all__'
     
-    # def __init__(self, *args, **kwargs):
-    #     super(CartSerializer, self).__init__(*args, **kwargs)
-    #     request = self.context.get('request')
-    #     if request and request.method == 'POST':
-    #         self.Meta.depth = 0
-    #     else:
-    #         self.Meta.depth = 3
+    
 
 class CartOrderItemSerializer(serializers.ModelSerializer):
 
@@ -220,10 +324,27 @@ class CartOrderSerializer(serializers.ModelSerializer):
 
 
 class VendorSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
 
     class Meta:
         model = Vendor
-        fields = '__all__'
+        #fields = '__all__'
+        exclude = ['name_en', 'name_ar','description_en','description_ar']
+
+    def get_name(self, obj):
+        request = self.context.get('request')
+        language = request.LANGUAGE_CODE if request else 'en'
+        if language == 'ar':
+            return obj.name_ar
+        return obj.name_en   
+
+    def get_description(self, obj):
+        request = self.context.get('request')
+        language = request.LANGUAGE_CODE if request else 'en'
+        if language == 'ar':
+            return obj.description_ar
+        return obj.description_en    
 
     def __init__(self, *args, **kwargs):
         super(VendorSerializer, self).__init__(*args, **kwargs)
@@ -419,9 +540,11 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = [
             "id",
-            "title",
+            "title_en",
+            "title_ar",
             "image",
-            "description",
+            "description_en",
+            "description_ar",
             "category",
             "price_EGP",
             "price_AED",
@@ -456,12 +579,26 @@ class ProductSerializer(serializers.ModelSerializer):
             self.Meta.depth = 3
 
 
+class SizeAddSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Size
+        fields = '__all__' 
+class SpecificationAddSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Specification
+        fields = '__all__' 
+class ColorAddSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Color
+        fields = '__all__' 
+
+
 
 class ProductAddSerializer(serializers.ModelSerializer):
     gallery = GallerySerializer(many=True,required=False,read_only=True)
-    color = ColorSerializer(many=True,required=False)
-    size = SizeSerializer(many=True,required=False)
-    specification = SpecificationSerializer(many=True,required=False)
+    color = ColorAddSerializer(many=True,required=False)
+    size = SizeAddSerializer(many=True,required=False)
+    specification = SpecificationAddSerializer(many=True,required=False)
     #prices = PriceSerializer(many=True,required=False)
     #image = serializers.SerializerMethodField()
 
@@ -470,9 +607,11 @@ class ProductAddSerializer(serializers.ModelSerializer):
         model = Product
         fields = [
             "id",
-            "title",
+            "title_en",
+            "title_ar",
             "image",
-            "description",
+            "description_en",
+            "description_ar",
             "category",
             "brand",
             "price_EGP",
@@ -539,7 +678,7 @@ class Color2Serializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class Product2Serializer(serializers.ModelSerializer):
-    #galleries = Gallery2Serializer(many=True, required=False)
+    galleries = Gallery2Serializer(many=True, required=False)
     specifications = Specification2Serializer(many=True, required=False)
     sizes = Size2Serializer(many=True, required=False)
     colors = Color2Serializer(many=True, required=False)
@@ -549,15 +688,15 @@ class Product2Serializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        #galleries_data = validated_data.pop('galleries', [])
+        galleries_data = validated_data.pop('galleries', [])
         specifications_data = validated_data.pop('specifications', [])
         sizes_data = validated_data.pop('sizes', [])
         colors_data = validated_data.pop('colors', [])
 
         product = Product.objects.create(**validated_data)
 
-        # for gallery_data in galleries_data:
-        #     Gallery.objects.create(product=product, **gallery_data)
+        for gallery_data in galleries_data:
+            Gallery.objects.create(product=product, **gallery_data)
 
         for specification_data in specifications_data:
             Specification.objects.create(product=product, **specification_data)
