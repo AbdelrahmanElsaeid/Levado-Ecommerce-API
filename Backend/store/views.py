@@ -13,6 +13,8 @@ import stripe
 from django.conf import settings
 from django.db.models import Q
 from django.http import Http404
+from django.utils.translation import get_language
+
 
 # Create your views here.
 
@@ -757,6 +759,8 @@ class Fpro(generics.ListAPIView):
         rating_str = self.request.query_params.get('rating')
         title_query = self.request.query_params.get('title')
 
+        lang = get_language()
+
         brand_ids = []
         category_ids = []
         prices = []
@@ -796,8 +800,16 @@ class Fpro(generics.ListAPIView):
         if rating is not None:
             queryset = queryset.filter(rating__gte=rating)
 
+        # if title_query:
+        #     queryset = queryset.filter(title__icontains=title_query)
         if title_query:
-            queryset = queryset.filter(title__icontains=title_query)
+            if lang == 'ar':
+                queryset = queryset.filter(title_ar__icontains=title_query)
+            elif lang == 'en':
+                queryset = queryset.filter(title_en__icontains=title_query)
+            else:
+                # Handle unsupported language or no language specified
+                queryset = queryset.none()
 
         return queryset
 
