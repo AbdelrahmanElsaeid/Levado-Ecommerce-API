@@ -125,7 +125,13 @@ class PaymobPaymentView(APIView):
 
         
         # Perform the second step to create the order   
-        order_data = create_order(token,grand_total, order_oid)
+        #order_data = create_order(token,grand_total, order_oid)
+
+        try:  
+            order_data = create_order(token,grand_total, order_oid)
+        except:
+            return Response({"message": "An error occurred while creating the order. Please login again and try to pay."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 
         # Perform the third step to generate the payment token 
 
