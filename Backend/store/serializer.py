@@ -38,7 +38,25 @@ class CategorySerializer(serializers.ModelSerializer):
 class GallerySerializer(serializers.ModelSerializer):
     class Meta:
         model = Gallery
-        fields = '__all__'        
+        fields = '__all__'  
+
+
+class SpecificationUpdateSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Specification
+        fields = '__all__' 
+
+class SizeUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Size 
+        fields = '__all__' 
+
+class ColorUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Color
+        fields = '__all__' 
+
 
 class SpecificationSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()

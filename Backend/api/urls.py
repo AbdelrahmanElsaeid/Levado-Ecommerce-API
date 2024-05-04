@@ -106,6 +106,14 @@ urlpatterns = [
     path('vendor-product-delete/<vendor_id>/<product_pid>/', vendor_views.ProductDeleteView.as_view(), name='vendor-product-delete'),
 
 
+    path('vendor-productDetail-update/<vendor_id>/<product_pid>/', vendor_views.ProductDetailUpdate.as_view(), name='vendor-product-update'),
+    path('vendor-productGallery-update/<vendor_id>/<product_pid>/', vendor_views.GalleryUpdateView.as_view(), name='vendor-product-update'),
+    path('vendor-productColor-update/<vendor_id>/<product_pid>/', vendor_views.ColorUpdateView.as_view(), name='vendor-product-update'),
+    path('vendor-productSpecification-update/<vendor_id>/<product_pid>/', vendor_views.SpecificationUpdateView.as_view(), name='vendor-product-update'),
+    path('vendor-productSize-update/<vendor_id>/<product_pid>/', vendor_views.SizeUpdateView.as_view(), name='vendor-product-update'),
+
+
+
 
 
 

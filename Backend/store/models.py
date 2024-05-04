@@ -7,8 +7,20 @@ from django.utils import timezone
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from unidecode import unidecode
+import shortuuid
+import uuid
+
 
 # Create your models here.
+def generate_default_uid():
+    # Use _create_uuid() method of ShortUUIDField to generate a UUID
+    default_uid = str(uuid.uuid4())[:10]
+
+    return default_uid
+
+
+
+
 class Brand(models.Model):
     title_en = models.CharField(max_length=100)
     title_ar = models.CharField(max_length=100,null=True, blank=True)
@@ -72,15 +84,7 @@ class Product(models.Model):
     slug = models.SlugField(unique=True,null=True,blank=True)
     date = models.DateTimeField(auto_now_add=True)
 
-    # def save(self,*args, **kwargs):
-    #     if self.slug == "" or self.slug== None:
-    #         self.slug =slugify(self.title)
-
-    #     super(Product, self).save(*args, **kwargs) 
-
-    # def save(self,*args, **kwargs):
-    #     self.slug = slugify(self.title)
-    #     super(Product,self).save(*args,**kwargs)
+ 
 
     def __str__(self):
         if self.title_en:
@@ -106,24 +110,30 @@ class Product(models.Model):
     def orders(self):
         return CartOrderItem.objects.filter(product=self).count()
     
-    # def save(self,*args, **kwargs):
-    #     #if self.slug == "" or self.slug== None:
-    #     if self.title_en:
-    #         self.slug =slugify(self.title_en)
-    #     if self.title_ar:
-    #         self.slug =slugify(self.title_ar)    
-    #     self.rating = self.product_rating()
-    #     super(Product, self).save(*args, **kwargs)
+   
 
     def save(self, *args, **kwargs):
         # Generate slug from English title if available
+        uuid_key = shortuuid.uuid()
+        uniqueid = uuid_key[:4]
+
         if self.title_en and (not self.slug or self.title_en != self.title_ar):
-            self.slug = slugify(self.title_en)
+            self.slug = slugify(self.title_en)+ "-" + str(uniqueid.lower())
         # If English title is not available, generate slug from Arabic title
         elif self.title_ar and (not self.slug or self.title_ar != self.title_en):
-            self.slug = slugify(unidecode(self.title_ar))
+            self.slug = slugify(unidecode(self.title_ar))+ "-" + str(uniqueid.lower())
+
         # Calculate rating
         self.rating = self.product_rating()
+        if self.stock_qty is not None:
+            if self.stock_qty == 0:
+                self.in_stock = False
+                
+            if self.stock_qty > 0:
+                self.in_stock = True
+        else:
+            self.stock_qty = 0
+            self.in_stock = False
         super(Product, self).save(*args, **kwargs)    
 
 
@@ -154,6 +164,7 @@ class Specification(models.Model):
     #title = models.CharField(max_length=1000)
     #content=models.CharField(max_length=1000)
     date=models.DateTimeField(auto_now_add=True)
+    spid=ShortUUIDField(length=10,alphabet="abcdefg123456", null=True, blank=True)
 
     def __str__(self):
         if self.title_en:
@@ -171,6 +182,7 @@ class Size(models.Model):
     #name = models.CharField(max_length=1000)
     price = models.DecimalField(decimal_places=2, max_digits=12, default=0.00)
     date=models.DateTimeField(auto_now_add=True)
+    sid=ShortUUIDField(length=10,alphabet="abcdefg123456",null=True, blank=True)
 
 
     def __str__(self):
@@ -182,12 +194,14 @@ class Size(models.Model):
             return "size"
    
 
+
 class Color(models.Model):
     product = models.ForeignKey(Product,related_name="color_product", on_delete=models.SET_NULL, null=True)
     #name = models.CharField(max_length=1000)
     color_code = models.CharField(max_length=1000)
     name_en = models.CharField(max_length=100,null=True, blank=True)
     name_ar = models.CharField(max_length=100,null=True, blank=True)
+    cid=ShortUUIDField(length=10,alphabet="abcdefg123456",null=True, blank=True)
 
 
     def __str__(self):

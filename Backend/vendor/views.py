@@ -2,9 +2,9 @@ from django.shortcuts import render
 
 # Create your views here.
 from .models import Vendor
-from store.serializer import SummarySerializer, ProductSerializer,CartOrderItemSerializer,CartOrderSerializer, EarningSerializer, ReviewSerializer,CouponSerializer,CouponSummarySerializer,NotificationSerializer,NotificationSummarySerializer,VendorSerializer, ColorSerializer,SpecificationSerializer,SizeSerializer,GallerySerializer,ProductAddSerializer,ColorAddSerializer,SizeAddSerializer,SpecificationAddSerializer,ProductListSerializer,ProductVendorListSerializer
+from store.serializer import SummarySerializer, ProductSerializer,CartOrderItemSerializer,CartOrderSerializer, EarningSerializer, ReviewSerializer,CouponSerializer,CouponSummarySerializer,NotificationSerializer,NotificationSummarySerializer,VendorSerializer, ColorSerializer,SpecificationSerializer,SizeSerializer,GallerySerializer,ProductAddSerializer,ColorAddSerializer,SizeAddSerializer,SpecificationAddSerializer,ProductListSerializer,ProductVendorListSerializer,ColorUpdateSerializer,SizeUpdateSerializer,SpecificationUpdateSerializer
 from django.shortcuts import render,redirect
-from store.models import Category,Product,Cart,Tax,CartOrder,CartOrderItem,Coupon,Notification,Review
+from store.models import Category,Product,Cart,Tax,CartOrder,CartOrderItem,Coupon,Notification,Review,Gallery,Color,Size,Specification
 from rest_framework import generics,status
 from rest_framework.permissions import AllowAny 
 from userauths.models import User,Profile
@@ -509,8 +509,8 @@ class ProductUpdateView(generics.RetrieveUpdateAPIView):
         product.color().delete()
         product.size().delete()
         product.gallery().delete()
-        # for item in product.gallery:
-        #     item.delete()
+
+        
 
         specifications_data = []
         colors_data = []
@@ -668,3 +668,214 @@ class ProductDeleteView(generics.DestroyAPIView):
            
         }, status=status.HTTP_200_OK)
 
+
+
+
+
+
+
+class ProductDetailUpdate(generics.UpdateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = GallerySerializer
+    permission_classes = (AllowAny, )
+
+    def get_object(self):
+        vendor_id = self.kwargs['vendor_id']
+        product_pid = self.kwargs['product_pid']
+        
+
+        vendor = Vendor.objects.get(id=vendor_id)
+        product = Product.objects.get(vendor=vendor, pid=product_pid)
+        return product
+
+    def update(self, request, *args, **kwargs):
+        product = self.get_object()
+
+        # Deserialize product data
+        serializer = self.get_serializer(product, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(product=product)
+        updated_product_serializer = self.get_serializer(product)
+
+        return Response({
+            'message': _('Product details have been updated successfully'),
+            'product': updated_product_serializer.data
+        }, status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
+
+
+
+from rest_framework.exceptions import ValidationError
+
+class GalleryUpdateView(generics.UpdateAPIView):
+    queryset = Gallery.objects.all()
+    serializer_class = GallerySerializer
+    permission_classes = (AllowAny, )
+
+    def get_object(self):
+        vendor_id = self.kwargs['vendor_id']
+        product_pid = self.kwargs['product_pid']
+        gallery_gid = self.request.data.get('gallery_gid')
+
+        vendor = Vendor.objects.get(id=vendor_id)
+        product = Product.objects.get(vendor=vendor, pid=product_pid)
+       
+        if gallery_gid:
+            try:
+                gallery = Gallery.objects.get(product=product, gid=gallery_gid)
+                return gallery
+            except Gallery.DoesNotExist:
+                raise ValidationError("Gallery matching query does not exist.")
+        else:
+            # If gallery_gid is None, create a new gallery
+            gallery_data = {'product': product.pk, 'image': self.request.data.get('image'), "active": self.request.data.get('active') }  # Assuming 'image' is provided in request data
+            serializer = GallerySerializer(data=gallery_data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return serializer.instance
+
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Deserialize gallery data
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response({'message': _('Gallery details have been updated successfully'),'gallery' : serializer.data}, status=status.HTTP_200_OK)
+
+    
+
+
+class ColorUpdateView(generics.UpdateAPIView):
+    queryset = Color.objects.all()
+    serializer_class = ColorUpdateSerializer
+    permission_classes = (AllowAny, )
+
+    def get_object(self):
+        vendor_id = self.kwargs['vendor_id']
+        product_pid = self.kwargs['product_pid']
+        color_cid = self.request.data.get('color_cid')
+
+        vendor = Vendor.objects.get(id=vendor_id)
+        product = Product.objects.get(vendor=vendor, pid=product_pid)
+       
+        if color_cid:
+            try:
+                color = Color.objects.get(product=product, cid=color_cid)
+                return color
+            except Color.DoesNotExist:
+                raise ValidationError("Color matching query does not exist.")
+        else:
+            # If gallery_gid is None, create a new gallery
+            color_data = {'product': product.pk, 'name_en': self.request.data.get('name_en'),'name_ar': self.request.data.get('name_ar'), "color_code": self.request.data.get('color_code') }  # Assuming 'image' is provided in request data
+            serializer = ColorUpdateSerializer(data=color_data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return serializer.instance
+
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Deserialize gallery data
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response({'message': _('Color have been updated successfully'),'colors' : serializer.data}, status=status.HTTP_200_OK)
+
+    
+
+
+class SpecificationUpdateView(generics.UpdateAPIView):
+    queryset = Specification.objects.all()
+    serializer_class = SpecificationUpdateSerializer
+    permission_classes = (AllowAny, )
+
+    def get_object(self):
+        vendor_id = self.kwargs['vendor_id']
+        product_pid = self.kwargs['product_pid']
+        spid = self.request.data.get('spid')
+
+        vendor = Vendor.objects.get(id=vendor_id)
+        product = Product.objects.get(vendor=vendor, pid=product_pid)
+       
+        if spid:
+            try:
+                specification = Specification.objects.get(product=product, spid=spid)
+                return specification
+            except Specification.DoesNotExist:
+                raise ValidationError("Specification matching query does not exist.")
+        else:
+            # If gallery_gid is None, create a new gallery
+            specification = {'product': product.pk, 'title_en': self.request.data.get('title_en'),'title_ar': self.request.data.get('title_ar'), "content_en": self.request.data.get('content_en'),"content_ar": self.request.data.get('content_ar') }  # Assuming 'image' is provided in request data
+            serializer = SpecificationUpdateSerializer(data=specification)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return serializer.instance
+
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response({'message': _('Specification have been updated successfully'),'Specification' : serializer.data}, status=status.HTTP_200_OK)
+
+
+
+class SizeUpdateView(generics.UpdateAPIView):
+    queryset = Size.objects.all()
+    serializer_class = SizeUpdateSerializer
+    permission_classes = (AllowAny, )
+
+    def get_object(self):
+        vendor_id = self.kwargs['vendor_id']
+        product_pid = self.kwargs['product_pid']
+        sid = self.request.data.get('sid')
+
+        vendor = Vendor.objects.get(id=vendor_id)
+        product = Product.objects.get(vendor=vendor, pid=product_pid)
+       
+        if sid:
+            try:
+                size = Size.objects.get(product=product, sid=sid)
+                return size
+            except Size.DoesNotExist:
+                raise ValidationError("Size matching query does not exist.")
+        else:
+            # If gallery_gid is None, create a new gallery
+            size_data = {'product': product.pk, 'name_en': self.request.data.get('name_en'),'name_ar': self.request.data.get('name_ar')}  # Assuming 'image' is provided in request data
+            serializer = SizeUpdateSerializer(data=size_data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return serializer.instance
+
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Deserialize gallery data
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response({'message': _('Size have been updated successfully'),'Size' : serializer.data}, status=status.HTTP_200_OK)
+
+    
+
+
+        
+
+        
