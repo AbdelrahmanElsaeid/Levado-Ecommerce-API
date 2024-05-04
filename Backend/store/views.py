@@ -14,6 +14,7 @@ from django.conf import settings
 from django.db.models import Q
 from django.http import Http404
 from django.utils.translation import get_language
+from django.utils.translation import gettext as _
 
 
 # Create your views here.
