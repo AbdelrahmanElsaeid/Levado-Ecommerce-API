@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from .models import Vendor
-from store.serializer import SummarySerializer, ProductSerializer,CartOrderItemSerializer,CartOrderSerializer, EarningSerializer, ReviewSerializer,CouponSerializer,CouponSummarySerializer,NotificationSerializer,NotificationSummarySerializer,VendorSerializer, ColorSerializer,SpecificationSerializer,SizeSerializer,GallerySerializer,ProductAddSerializer,ColorAddSerializer,SizeAddSerializer,SpecificationAddSerializer
+from store.serializer import SummarySerializer, ProductSerializer,CartOrderItemSerializer,CartOrderSerializer, EarningSerializer, ReviewSerializer,CouponSerializer,CouponSummarySerializer,NotificationSerializer,NotificationSummarySerializer,VendorSerializer, ColorSerializer,SpecificationSerializer,SizeSerializer,GallerySerializer,ProductAddSerializer,ColorAddSerializer,SizeAddSerializer,SpecificationAddSerializer,ProductListSerializer
 from django.shortcuts import render,redirect
 from store.models import Category,Product,Cart,Tax,CartOrder,CartOrderItem,Coupon,Notification,Review
 from rest_framework import generics,status
@@ -71,7 +71,7 @@ def MonthlyProductChartAPIView(request, vendor_id):
 
 
 class ProductsAPIView(generics.ListAPIView):
-    serializer_class = ProductSerializer
+    serializer_class = ProductListSerializer#ProductSerializer
     permission_classes = (AllowAny,)
 
     def get_queryset(self):
@@ -79,6 +79,11 @@ class ProductsAPIView(generics.ListAPIView):
         vendor = Vendor.objects.get(id=vendor_id)
         products = Product.objects.filter(vendor=vendor)
         return products
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['currency_code'] = self.kwargs.get('currency')
+        return context 
 
 
 class OrdersAPIView(generics.ListAPIView):
@@ -383,6 +388,11 @@ class ShopProductsAPIView(generics.ListAPIView):
         vendor = Vendor.objects.get(slug=vendor_slug)
         products = Product.objects.filter(vendor=vendor)
         return products
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['currency_code'] = self.kwargs.get('currency')
+        return context 
     
 
 
