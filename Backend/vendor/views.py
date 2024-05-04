@@ -591,13 +591,19 @@ class ProductUpdateView(generics.RetrieveUpdateAPIView):
 
 
 class ProductDeleteView(generics.DestroyAPIView):
-    serializer_class = ProductAddSerializer
+    serializer_class =ProductVendorListSerializer #ProductAddSerializer
 
     def get_queryset(self):
         vendor_id = self.kwargs['vendor_id']
         vendor = Vendor.objects.get(id=vendor_id)
         products = Product.objects.filter(vendor=vendor)
         return products
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        print(f"request:   {context}")
+        return context
 
     def get_object(self):
         vendor_id = self.kwargs['vendor_id']
@@ -643,13 +649,14 @@ class ProductDeleteView(generics.DestroyAPIView):
 
         
         queryset = self.get_queryset()  
-        serializer = self.serializer_class(queryset, many=True).data 
+        serializer = self.serializer_class(queryset, many=True,context={'request': request}).data 
 
         for item in serializer:
                 item['image'] = self.get_complete_image_url(item['image'])
-                item['category']['image'] = self.get_complete_image_url(item['category']['image'])
+                #item['category']['image'] = self.get_complete_image_url(item['category']['image'])
 
-     
+
+       
 
 
         return Response({
