@@ -323,7 +323,7 @@ class CartAPIView(generics.ListCreateAPIView):
 
             cart.total =cart.sub_total + cart.shipping_amount + cart.tax_fee
             cart.save()
-            return Response({'message': "Cart Updated Successfully"}, status=status.HTTP_200_OK)
+            return Response({'message': _("Cart Updated Successfully")}, status=status.HTTP_200_OK)
 
         else:
             cart=Cart()
@@ -346,7 +346,7 @@ class CartAPIView(generics.ListCreateAPIView):
 
             cart.total =cart.sub_total + cart.shipping_amount + cart.tax_fee
             cart.save()
-            return Response({'message': "Cart Created Successfully"}, status=status.HTTP_201_CREATED)
+            return Response({'message': _("Cart Created Successfully")}, status=status.HTTP_201_CREATED)
 
 
 
@@ -452,7 +452,7 @@ class CartItemDeleteAPIView(generics.DestroyAPIView):
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
-        return Response({'message': 'Item deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
+        return Response({'message': _('Item deleted successfully.')}, status=status.HTTP_204_NO_CONTENT)
     
 
 
@@ -551,7 +551,7 @@ class CreateOrderAPIView(generics.CreateAPIView):
 
         order.save()
 
-        return Response({"message": "Order created successfully", "order_oid":order.oid}, status=status.HTTP_201_CREATED)     
+        return Response({"message": _("Order created successfully"), "order_oid":order.oid}, status=status.HTTP_201_CREATED)     
 
 
 class CheckoutView(generics.RetrieveAPIView):

@@ -8,6 +8,7 @@ from .models import User, Profile
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from django.contrib.auth import authenticate
+from django.utils.translation import gettext as _
 
 
 class LoginSerializer(serializers.Serializer):
@@ -57,7 +58,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 def validate_phone_number(value):
     if not value.startswith('01'):
-        raise serializers.ValidationError({'phone':'Phone number must start with "01".'})
+        raise serializers.ValidationError({'phone':_('Phone number must start with "01".')})
     
 def validate_full_name(value):
     if len(value) < 3:
@@ -90,7 +91,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         self.validate_full_name_and_phone(attrs)
         if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({"status": "error", "message":"Password does not match"})
+            raise serializers.ValidationError({"status": "error", "message":_("Password does not match")})
         return attrs
         
       
@@ -98,7 +99,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         value=validated_data['email'],
 
         if User.objects.filter(email=value).exists():
-            return Response({'Message': 'This email is already used'}, status=status.HTTP_200_OK)
+            return Response({'Message': _('This email is already used')}, status=status.HTTP_200_OK)
        
         else:
             user = User.objects.create(
@@ -111,7 +112,7 @@ class RegisterSerializer(serializers.ModelSerializer):
                 user.username = email_user
                 print(f"email useername--------- {email_user}")
             except:
-                Response({'Message': 'This email is already used'}, status=status.HTTP_200_OK)
+                Response({'Message': _('This email is already used')}, status=status.HTTP_200_OK)
 
             user.set_password(validated_data['password'])
 

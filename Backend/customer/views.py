@@ -10,6 +10,11 @@ from rest_framework.response import Response
 from django.http import Http404
 from django.conf import settings
 from django.shortcuts import get_object_or_404
+
+from django.db.models import F, FloatField, ExpressionWrapper
+from django.db.models.functions import Coalesce
+from django.utils.translation import gettext as _
+
 # Create your views here.
 
 class OrderAPIView(generics.ListAPIView):
@@ -78,10 +83,10 @@ class WishlistCreateAPIView(generics.CreateAPIView):
 
             if wishlist_exists:
                 Wishlist.objects.filter(product=product, user=user).delete()
-                message = "Removed From Wishlist"
+                message = _("Removed From Wishlist")
             else:
                 Wishlist.objects.create(product=product, user=user)
-                message = "Added To Wishlist"
+                message = _("Added To Wishlist")
 
             wishlist_product_ids = self.get_user_wishlist_product_ids(user)
 
@@ -106,11 +111,9 @@ class WishlistCreateAPIView(generics.CreateAPIView):
 
             for item in serialized_wishlist:
                 item['product']['image'] = self.get_complete_image_url(item['product']['image'])
-            return Response({"message": "Get Wishlist", "wishlist": wishlist_product_ids, "data": serialized_wishlist}, status=status.HTTP_200_OK )
+            return Response({"message": _("Get Wishlist"), "wishlist": wishlist_product_ids, "data": serialized_wishlist}, status=status.HTTP_200_OK )
 
 
-from django.db.models import F, FloatField, ExpressionWrapper
-from django.db.models.functions import Coalesce
 
 class WishlistAPIView(generics.ListAPIView):
     serializer_class = WishlistListSerializer

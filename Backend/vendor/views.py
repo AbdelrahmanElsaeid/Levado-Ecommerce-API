@@ -17,7 +17,7 @@ from django.db import models
 import requests
 from django.db.models.functions import ExtractMonth
 from datetime import datetime, time, timedelta
-
+from django.utils.translation import gettext as _
 from rest_framework.decorators import api_view
 # Create your views here.
 
@@ -247,7 +247,7 @@ class CouponCreateAPIView(generics.CreateAPIView):
             active=(active.lower() == "true")
         )
 
-        return Response({"message": "Coupon Created Successfully."}, status=status.HTTP_201_CREATED)
+        return Response({"message": _("Coupon Created Successfully.")}, status=status.HTTP_201_CREATED)
 
 
 class CouponDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -563,7 +563,7 @@ class ProductUpdateView(generics.RetrieveUpdateAPIView):
         self.save_nested_data(product, SizeSerializer, sizes_data)
         self.save_nested_data(product, GallerySerializer, gallery_data)
 
-        return Response({'message': 'Product Updated'}, status=status.HTTP_200_OK)
+        return Response({'message': _('Product Updated')}, status=status.HTTP_200_OK)
 
     def save_nested_data(self, product_instance, serializer_class, data):
         serializer = serializer_class(data=data, many=True, context={
@@ -644,7 +644,7 @@ class ProductDeleteView(generics.DestroyAPIView):
 
         return Response({
             "status": "Success",
-            "message": "Product deleted successfully",
+            "message": _("Product deleted successfully"),
             "dashboard_stats": stats_data,
             "products": serializer,
             

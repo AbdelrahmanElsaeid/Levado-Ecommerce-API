@@ -17,6 +17,8 @@ from rest_framework.views import APIView
 import jwt, datetime
 from django.views.decorators.csrf import get_token
 from django.http import JsonResponse
+from django.utils.translation import gettext as _
+
 
 
 def get_csrf_token(request):
@@ -32,11 +34,11 @@ class LoginView(APIView):
 
         if user is None:
             #aise AuthenticationFailed('User not found!')
-            return Response({"status": "Error","message": "Invalid Email or password"}, status=status.HTTP_200_OK)
+            return Response({"status": "Error","message": _("Invalid Email or password")}, status=status.HTTP_200_OK)
 
         if not user.check_password(password):
             #raise AuthenticationFailed('Incorrect password!')
-            return Response({"status": "Error","message": "Invalid Email or password"}, status=status.HTTP_200_OK)
+            return Response({"status": "Error","message": _("Invalid Email or password")}, status=status.HTTP_200_OK)
 
         refresh = RefreshToken.for_user(user)
 
@@ -51,7 +53,7 @@ class LoginView(APIView):
 
         return Response({
             'status': 'success', 
-            'message': 'login successfully',
+            'message': _("login successfully"), 
             "tokens":{ 
             'access': str(refresh.access_token),
             'refresh': str(refresh),
@@ -106,11 +108,11 @@ class RegisterView(generics.CreateAPIView):
         email_user, _ = email.split("@")
 
         if User.objects.filter(email=email).exists():
-            return Response({'status': 'error','message': 'This email is already used.'}, status=status.HTTP_200_OK)
+            return Response({'status': 'error','message': _('This email is already used.')}, status=status.HTTP_200_OK)
         
         if User.objects.filter(username=email_user).exists(): 
         
-            return Response({'status': 'error','message': 'This email is already used.'}, status=status.HTTP_200_OK)
+            return Response({'status': 'error','message': _('This email is already used.')}, status=status.HTTP_200_OK)
         
 
 
@@ -118,7 +120,7 @@ class RegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response({'message': 'User created successfully.', 'status': 'success', 'data': serializer.data}, status=status.HTTP_201_CREATED, headers=headers)
+        return Response({'message': _('User created successfully.'), 'status': 'success', 'data': serializer.data}, status=status.HTTP_201_CREATED, headers=headers)
 
     
 
@@ -162,7 +164,7 @@ class PasswordRestEmailVerify(generics.CreateAPIView):
             user = User.objects.get(email=email)
         except:
             
-            return Response({"status": "error", "message":"This Email isn't exist"}, status=status.HTTP_200_OK)     
+            return Response({"status": "error", "message":_("This Email isn't exist")}, status=status.HTTP_200_OK)     
 
         if user:
             user.otp= generate_otp()
@@ -189,7 +191,7 @@ class PasswordRestEmailVerify(generics.CreateAPIView):
 
             
 
-        return Response({'status':'success','message': "Check Your Email"}, status=status.HTTP_201_CREATED)    
+        return Response({'status':'success','message': _("Check Your Email")}, status=status.HTTP_201_CREATED)    
 
 
 class PasswordChangeView(generics.CreateAPIView):
@@ -204,7 +206,7 @@ class PasswordChangeView(generics.CreateAPIView):
         password = payload['password']
         password2 = payload['password2']
         if password != password2:
-            return Response({"status": "error", "message":"Password does not match"}, status=status.HTTP_200_OK)
+            return Response({"status": "error", "message":_("Password does not match")}, status=status.HTTP_200_OK)
 
 
         user = User.objects.get(otp=otp, id=uidb64)
@@ -213,9 +215,9 @@ class PasswordChangeView(generics.CreateAPIView):
             user.set_password(password)
             user.otp= ""
             user.save()
-            return Response({"message": "Password Changed Successfully"}, status=status.HTTP_201_CREATED)
+            return Response({"message": _("Password Changed Successfully")}, status=status.HTTP_201_CREATED)
         else:
-            return Response({"message": "User Does Not Exists"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"message": _("User Does Not Exists")}, status=status.HTTP_404_NOT_FOUND)
 
 
 
