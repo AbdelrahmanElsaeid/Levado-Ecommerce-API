@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from .models import Vendor
-from store.serializer import SummarySerializer, ProductSerializer,CartOrderItemSerializer,CartOrderSerializer, EarningSerializer, ReviewSerializer,CouponSerializer,CouponSummarySerializer,NotificationSerializer,NotificationSummarySerializer,VendorSerializer, ColorSerializer,SpecificationSerializer,SizeSerializer,GallerySerializer,ProductAddSerializer,ColorAddSerializer,SizeAddSerializer,SpecificationAddSerializer,ProductListSerializer
+from store.serializer import SummarySerializer, ProductSerializer,CartOrderItemSerializer,CartOrderSerializer, EarningSerializer, ReviewSerializer,CouponSerializer,CouponSummarySerializer,NotificationSerializer,NotificationSummarySerializer,VendorSerializer, ColorSerializer,SpecificationSerializer,SizeSerializer,GallerySerializer,ProductAddSerializer,ColorAddSerializer,SizeAddSerializer,SpecificationAddSerializer,ProductListSerializer,ProductVendorListSerializer
 from django.shortcuts import render,redirect
 from store.models import Category,Product,Cart,Tax,CartOrder,CartOrderItem,Coupon,Notification,Review
 from rest_framework import generics,status
@@ -71,7 +71,7 @@ def MonthlyProductChartAPIView(request, vendor_id):
 
 
 class ProductsAPIView(generics.ListAPIView):
-    serializer_class = ProductListSerializer#ProductSerializer
+    serializer_class = ProductVendorListSerializer#ProductSerializer
     permission_classes = (AllowAny,)
 
     def get_queryset(self):
@@ -123,7 +123,7 @@ class RevenueAPIView(generics.ListAPIView):
 
 
 class FilterProductsAPIView(generics.ListAPIView):
-    serializer_class = ProductSerializer
+    serializer_class =ProductVendorListSerializer #ProductSerializer
     permission_classes = (AllowAny,)
 
     def get_queryset(self):

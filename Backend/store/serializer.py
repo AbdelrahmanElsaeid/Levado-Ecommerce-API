@@ -709,3 +709,64 @@ class Product2Serializer(serializers.ModelSerializer):
             Color.objects.create(product=product, **color_data)
 
         return product    
+    
+
+
+
+
+
+
+
+class ProductVendorListSerializer(serializers.ModelSerializer):
+    
+    title = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+     
+    class Meta:
+        model = Product
+        fields = [
+            "id",
+            "title",
+            "image",
+            
+            "category",
+            "price_EGP",
+            "price_AED",
+            
+            "stock_qty",
+            "in_stock",
+            "status",
+            
+            "rating",
+           
+            "pid",
+            "slug",
+            
+            
+            "product_rating",
+            "rating_count",
+            "orders",
+        ]
+
+
+    def get_title(self, obj):
+        request = self.context.get('request')
+        language = request.LANGUAGE_CODE if request else 'en'
+        if language == 'ar':
+            return obj.title_ar
+        return obj.title_en  
+
+    def get_category(self, obj):
+        request = self.context.get('request')
+        language = request.LANGUAGE_CODE if request else 'en'  
+        if language == 'ar':
+            return obj.category.title_ar if obj.category else None
+        return obj.category.title_en if obj.category else None   
+    
+    # def __init__(self, *args, **kwargs):
+    #     super(ProductVendorListSerializer, self).__init__(*args, **kwargs)
+    #     request = self.context.get('request')
+    #     if request and request.method == 'POST':
+    #         self.Meta.depth = 0
+    #     else:
+    #         self.Meta.depth = 3
