@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-04 13:41+0300\n"
+"POT-Creation-Date: 2024-05-05 17:20+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,19 +31,19 @@ msgstr "تمت الإضافة إلى قائمة الرغبات"
 msgid "Get Wishlist"
 msgstr "الحصول على قائمة الرغبات"
 
-#: .\store\views.py:326
+#: .\store\views.py:327
 msgid "Cart Updated Successfully"
 msgstr "تم تحديث السلة بنجاح"
 
-#: .\store\views.py:349
+#: .\store\views.py:350
 msgid "Cart Created Successfully"
 msgstr "تم إنشاء السلة بنجاح"
 
-#: .\store\views.py:455
+#: .\store\views.py:456
 msgid "Item deleted successfully."
 msgstr "تم حذف العنصر بنجاح"
 
-#: .\store\views.py:554
+#: .\store\views.py:555
 msgid "Order created successfully"
 msgstr "تم إنشاء الطلب بنجاح"
 
@@ -51,11 +51,12 @@ msgstr "تم إنشاء الطلب بنجاح"
 msgid "Phone number must start with \"01\"."
 msgstr "يجب أن يبدأ رقم الهاتف بـ \"01\"."
 
-#: .\userauths\serializer.py:94 .\userauths\views.py:209
+#: .\userauths\serializer.py:94 .\userauths\views.py:219
 msgid "Password does not match"
 msgstr "كلمة المرور غير متطابقة"
 
 #: .\userauths\serializer.py:102 .\userauths\serializer.py:115
+#: .\userauths\views.py:116 .\userauths\views.py:124
 msgid "This email is already used"
 msgstr "هذا البريد الإلكتروني مستخدم بالفعل"
 
@@ -67,41 +68,67 @@ msgstr "بريد إلكتروني أو كلمة مرور غير صالحة"
 msgid "login successfully"
 msgstr "تم تسجيل الدخول بنجاح"
 
-#: .\userauths\views.py:111 .\userauths\views.py:115
-msgid "This email is already used."
-msgstr "هذا البريد الإلكتروني مستخدم بالفعل."
-
-#: .\userauths\views.py:123
+#: .\userauths\views.py:133
 msgid "User created successfully."
 msgstr "تم إنشاء المستخدم بنجاح."
 
-#: .\userauths\views.py:167
+#: .\userauths\views.py:177
 msgid "This Email isn't exist"
 msgstr "هذا البريد الإلكتروني غير موجود"
 
-#: .\userauths\views.py:194
+#: .\userauths\views.py:204
 msgid "Check Your Email"
 msgstr "تحقق من بريدك الإلكتروني"
 
-#: .\userauths\views.py:218
+#: .\userauths\views.py:228
 msgid "Password Changed Successfully"
 msgstr "تم تغيير كلمة المرور بنجاح"
 
-#: .\userauths\views.py:220
+#: .\userauths\views.py:230
 msgid "User Does Not Exists"
 msgstr "المستخدم غير موجود"
 
-#: .\vendor\views.py:250
+#: .\vendor\views.py:257
 msgid "Coupon Created Successfully."
 msgstr "تم إنشاء الكوبون بنجاح."
 
-#: .\vendor\views.py:566
+#: .\vendor\views.py:578
 msgid "Product Updated"
 msgstr "تم تحديث المنتج"
 
-#: .\vendor\views.py:647
+#: .\vendor\views.py:666
 msgid "Product deleted successfully"
 msgstr "تم حذف المنتج بنجاح"
+
+#: .\vendor\views.py:703
+#, fuzzy
+#| msgid "Product deleted successfully"
+msgid "Product details have been updated successfully"
+msgstr "تم حذف المنتج بنجاح"
+
+#: .\vendor\views.py:772
+#, fuzzy
+#| msgid "Cart Updated Successfully"
+msgid "Gallery details have been updated successfully"
+msgstr "تم تحديث السلة بنجاح"
+
+#: .\vendor\views.py:826
+#, fuzzy
+#| msgid "Cart Updated Successfully"
+msgid "Color have been updated successfully"
+msgstr "تم تحديث السلة بنجاح"
+
+#: .\vendor\views.py:866
+#, fuzzy
+#| msgid "Cart Updated Successfully"
+msgid "Specification have been updated successfully"
+msgstr "تم تحديث السلة بنجاح"
+
+#: .\vendor\views.py:906
+#, fuzzy
+#| msgid "Cart Updated Successfully"
+msgid "Size have been updated successfully"
+msgstr "تم تحديث السلة بنجاح"
 
 #: .\venv\Lib\site-packages\django\contrib\messages\apps.py:15
 msgid "Messages"
@@ -1313,3 +1340,6 @@ msgstr ""
 #: .\venv\Lib\site-packages\shortuuid\django_fields.py:12
 msgid "A short UUID field."
 msgstr ""
+
+#~ msgid "This email is already used."
+#~ msgstr "هذا البريد الإلكتروني مستخدم بالفعل."
