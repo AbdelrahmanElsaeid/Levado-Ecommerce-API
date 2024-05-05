@@ -113,6 +113,13 @@ urlpatterns = [
     path('vendor-productSize-update/<vendor_id>/<product_pid>/', vendor_views.SizeUpdateView.as_view(), name='vendor-product-update'),
 
 
+    path('vendor-productGallery-delete/<vendor_id>/<product_pid>/', vendor_views.GalleryDeleteView.as_view(), name='vendor-product-update'),
+    path('vendor-productSpecification-delete/<vendor_id>/<product_pid>/', vendor_views.SpecificationDeleteView.as_view(), name='vendor-product-update'),
+    path('vendor-productColor-delete/<vendor_id>/<product_pid>/', vendor_views.ColorDeleteView.as_view(), name='vendor-product-update'),
+    path('vendor-productSize-delete/<vendor_id>/<product_pid>/', vendor_views.SizeDeleteView.as_view(), name='vendor-product-update'),
+
+
+
 
 
 

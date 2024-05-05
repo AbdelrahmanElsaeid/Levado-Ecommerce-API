@@ -908,6 +908,193 @@ class SizeUpdateView(generics.UpdateAPIView):
     
 
 
+class SizeDeleteView(generics.DestroyAPIView):
+    queryset = Size.objects.all()
+    serializer_class = SizeUpdateSerializer
+    permission_classes = (AllowAny, )
+
+
+    def get_object(self):
+        vendor_id = self.kwargs['vendor_id']
+        product_pid = self.kwargs['product_pid']
+        sid = self.request.data.get('sid')
+
+        vendor = Vendor.objects.get(id=vendor_id)
+        product = Product.objects.get(vendor=vendor, pid=product_pid)               
+        size = Size.objects.get(product=product, sid=sid)
+        return size
+
+    def get_queryset(self):
+        vendor_id = self.kwargs['vendor_id']
+        product_pid = self.kwargs['product_pid']
+        vendor = Vendor.objects.get(id=vendor_id)
+        product = Product.objects.get(vendor=vendor, pid=product_pid)               
+        size = Size.objects.filter(product=product)
+        return size
+        
+
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+
+        queryset = self.get_queryset()  
+        serializer = self.serializer_class(queryset, many=True).data
+  
+
+
+        return Response({
+            "status": "Success",
+            "message": _("Size deleted successfully"),
+            "sizes": serializer,
+            
+           
+        }, status=status.HTTP_200_OK)   
+
+
+class ColorDeleteView(generics.DestroyAPIView):
+    queryset = Color.objects.all()
+    serializer_class = ColorUpdateSerializer
+    permission_classes = (AllowAny, )
+
+
+    def get_object(self):
+        vendor_id = self.kwargs['vendor_id']
+        product_pid = self.kwargs['product_pid']
+        color_cid = self.request.data.get('color_cid')
+
+        vendor = Vendor.objects.get(id=vendor_id)
+        product = Product.objects.get(vendor=vendor, pid=product_pid)               
+        color = Color.objects.get(product=product, cid=color_cid)
+        return color
+    def get_queryset(self):
+        vendor_id = self.kwargs['vendor_id']
+        product_pid = self.kwargs['product_pid']
+        vendor = Vendor.objects.get(id=vendor_id)
+        product = Product.objects.get(vendor=vendor, pid=product_pid)               
+        color = Color.objects.filter(product=product)
+        return color
+    
+
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+
+        queryset = self.get_queryset()  
+        serializer = self.serializer_class(queryset, many=True).data
+  
+
+
+        return Response({
+            "status": "Success",
+            "message": _("Color deleted successfully"),
+            "sizes": serializer,
+            
+           
+        }, status=status.HTTP_200_OK)   
+                
+
+
+class SpecificationDeleteView(generics.DestroyAPIView):
+    queryset = Specification.objects.all()
+    serializer_class = SpecificationUpdateSerializer
+    permission_classes = (AllowAny, )
+
+
+    def get_object(self):
+        vendor_id = self.kwargs['vendor_id']
+        product_pid = self.kwargs['product_pid']
+        spid = self.request.data.get('spid')
+
+        vendor = Vendor.objects.get(id=vendor_id)
+        product = Product.objects.get(vendor=vendor, pid=product_pid)               
+        specification = Specification.objects.get(product=product, spid=spid)
+        return specification
+    def get_queryset(self):
+        vendor_id = self.kwargs['vendor_id']
+        product_pid = self.kwargs['product_pid']
+        vendor = Vendor.objects.get(id=vendor_id)
+        product = Product.objects.get(vendor=vendor, pid=product_pid)               
+        specification = Specification.objects.filter(product=product)
+        return specification
+    
+
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+
+        queryset = self.get_queryset()  
+        serializer = self.serializer_class(queryset, many=True).data
+  
+
+
+        return Response({
+            "status": "Success",
+            "message": _("Specification deleted successfully"),
+            "sizes": serializer,
+            
+           
+        }, status=status.HTTP_200_OK)   
+                
+
+        
+
+class GalleryDeleteView(generics.DestroyAPIView):
+    queryset = Gallery.objects.all()
+    serializer_class = GallerySerializer
+    permission_classes = (AllowAny, )
+
+
+    def get_object(self):
+        vendor_id = self.kwargs['vendor_id']
+        product_pid = self.kwargs['product_pid']
+        gallery_gid = self.request.data.get('gallery_gid')
+
+        vendor = Vendor.objects.get(id=vendor_id)
+        product = Product.objects.get(vendor=vendor, pid=product_pid)               
+        gallery = Gallery.objects.get(product=product, gid=gallery_gid)
+        return gallery
+    def get_queryset(self):
+        vendor_id = self.kwargs['vendor_id']
+        product_pid = self.kwargs['product_pid']
+        vendor = Vendor.objects.get(id=vendor_id)
+        product = Product.objects.get(vendor=vendor, pid=product_pid)               
+        gallery = Gallery.objects.filter(product=product)
+        return gallery
+    
+    def get_complete_image_path(self, image_path):
+        return self.request.build_absolute_uri(image_path)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+
+        queryset = self.get_queryset()  
+        serializer = self.serializer_class(queryset, many=True).data
+
+        for item in serializer:
+            item['image'] = self.get_complete_image_path(item['image'])
+  
+
+
+        return Response({
+            "status": "Success",
+            "message": _("Gallery deleted successfully"),
+            "sizes": serializer,
+            
+           
+        }, status=status.HTTP_200_OK)   
+                
+
+        
+
+        
+        
+
+        
+        
         
 
         
