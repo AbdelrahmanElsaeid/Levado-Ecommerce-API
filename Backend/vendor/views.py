@@ -676,7 +676,7 @@ class ProductDeleteView(generics.DestroyAPIView):
 
 class ProductDetailUpdate(generics.UpdateAPIView):
     queryset = Product.objects.all()
-    serializer_class = GallerySerializer
+    serializer_class = ProductAddSerializer
     permission_classes = (AllowAny, )
 
     def get_object(self):
