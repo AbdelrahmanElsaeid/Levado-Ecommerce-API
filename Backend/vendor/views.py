@@ -19,6 +19,8 @@ from django.db.models.functions import ExtractMonth
 from datetime import datetime, time, timedelta
 from django.utils.translation import gettext as _
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import ValidationError
+
 # Create your views here.
 
 
@@ -712,7 +714,6 @@ class ProductDetailUpdate(generics.UpdateAPIView):
 
 
 
-from rest_framework.exceptions import ValidationError
 
 class GalleryUpdateView(generics.UpdateAPIView):
     queryset = Gallery.objects.all()
@@ -740,6 +741,24 @@ class GalleryUpdateView(generics.UpdateAPIView):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return serializer.instance
+        
+    # def get_complete_image_url(self, image_path):
+    #     # Assuming BASE_URL is defined in your Django settings
+    #     if isinstance(settings.BASE_URL, tuple):
+    #         # Convert tuple to string
+    #         base_url = ''.join(settings.BASE_URL)
+    #     else:
+    #         base_url = settings.BASE_URL
+    #     return base_url + image_path
+
+    # def get_complete_image_url(self, image_path):
+    #     # Assuming BASE_URL is defined in your Django settings
+    #     base_url = settings.BASE_URL
+    #     if isinstance(base_url, tuple):
+    #         # Convert tuple to string
+    #         base_url = ''.join(base_url)
+    #     complete_url = urljoin(base_url, image_path)
+    #    return complete_url
 
 
     def update(self, request, *args, **kwargs):
@@ -751,6 +770,19 @@ class GalleryUpdateView(generics.UpdateAPIView):
         serializer.save()
 
         return Response({'message': _('Gallery details have been updated successfully'),'gallery' : serializer.data}, status=status.HTTP_200_OK)
+
+
+        # Retrieve all galleries for the product
+
+        # product = instance.product
+        # galleries = Gallery.objects.filter(product=product)
+        
+        # for gallery in galleries:
+        #     gallery.image = self.get_complete_image_url(gallery.image.url)
+        # gallery_serializer = GallerySerializer(galleries, many=True)
+
+        #return Response({'message': _('Gallery details have been updated successfully'),'galleries' : gallery_serializer.data}, status=status.HTTP_200_OK)
+
 
     
 

@@ -108,11 +108,12 @@ class RegisterView(generics.CreateAPIView):
         email_user, _ = email.split("@")
 
         if User.objects.filter(email=email).exists():
-            return Response({'status': 'error','message': _('This email is already used.')}, status=status.HTTP_200_OK)
+            return Response({'status': 'error','message': 'This email is already used.'}, status=status.HTTP_200_OK)
+
         
         if User.objects.filter(username=email_user).exists(): 
         
-            return Response({'status': 'error','message': _('This email is already used.')}, status=status.HTTP_200_OK)
+            return Response({'status': 'error','message': 'This email is already used.'}, status=status.HTTP_200_OK)
         
 
 
@@ -120,7 +121,8 @@ class RegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response({'message': _('User created successfully.'), 'status': 'success', 'data': serializer.data}, status=status.HTTP_201_CREATED, headers=headers)
+        #return Response({'message': _('User created successfully.'), 'status': 'success', 'data': serializer.data}, status=status.HTTP_201_CREATED, headers=headers)
+        return Response({'message': 'User created successfully.', 'status': 'success', 'data': serializer.data}, status=status.HTTP_201_CREATED, headers=headers)
 
     
 
