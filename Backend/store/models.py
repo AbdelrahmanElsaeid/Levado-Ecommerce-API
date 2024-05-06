@@ -117,11 +117,17 @@ class Product(models.Model):
         uuid_key = shortuuid.uuid()
         uniqueid = uuid_key[:4]
 
-        if self.title_en and (not self.slug or self.title_en != self.title_ar):
-            self.slug = slugify(self.title_en)+ "-" + str(uniqueid.lower())
+        if self.title_en and not self.slug:
+            self.slug = slugify(self.title_en) + "-" + str(uniqueid.lower())
         # If English title is not available, generate slug from Arabic title
-        elif self.title_ar and (not self.slug or self.title_ar != self.title_en):
-            self.slug = slugify(unidecode(self.title_ar))+ "-" + str(uniqueid.lower())
+        elif self.title_ar and not self.slug:
+            self.slug = slugify(unidecode(self.title_ar)) + "-" + str(uniqueid.lower())
+
+        # if self.title_en and (not self.slug or self.title_en != self.title_ar):
+        #     self.slug = slugify(self.title_en)+ "-" + str(uniqueid.lower())
+        # # If English title is not available, generate slug from Arabic title
+        # elif self.title_ar and (not self.slug or self.title_ar != self.title_en):
+        #    self.slug = slugify(unidecode(self.title_ar))+ "-" + str(uniqueid.lower())
 
         # Calculate rating
         self.rating = self.product_rating()
