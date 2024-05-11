@@ -1,6 +1,6 @@
 from decimal import Decimal
 from rest_framework import serializers
-
+from django.utils.translation import get_language
 from userauths.serializer import ProfileReviewSerializer, ProfileSerializer
 from .models import Product,Category,Brand,Gallery,Specification,Color,Size,Cart,CartOrder,CartOrderItem,Coupon,ProductFaq,Review,Wishlist,Notification
 from vendor.models import Vendor
@@ -431,6 +431,40 @@ class WishlistListSerializer(serializers.ModelSerializer):
         product_representation = representation.pop('product')
         currency_code = self.context.get('currency_code')
 
+
+
+        # Check the language
+        language = get_language()
+
+        # Set the title based on the language
+        if language == 'ar' and 'title_ar' in product_representation:
+            title = product_representation['title_ar']
+        elif language == 'en' and 'title_en' in product_representation:
+            title = product_representation['title_en']
+        else:
+            title = None
+
+        if language == 'ar' and 'description_ar' in product_representation:
+            description = product_representation['description_ar']
+        elif language == 'en' and 'description_en' in product_representation:
+            description = product_representation['description_en']
+        else:
+            description = None
+
+
+
+        if title is not None:
+            # representation['title'] = title
+            product_representation['title'] = title
+
+        if description is not None:
+            product_representation['description'] = description    
+    
+
+
+
+
+
         # Check if converted_price exists in the product representation
         if 'price' in product_representation:
             representation['price'] = product_representation['price']
@@ -453,6 +487,17 @@ class WishlistListSerializer(serializers.ModelSerializer):
         # Remove price_EGP and price_AED fields
         product_representation.pop('price_EGP', None)
         product_representation.pop('price_AED', None)
+
+
+        # Remove desc and title fields
+        product_representation.pop('title_en', None)
+        product_representation.pop('title_ar', None)
+        product_representation.pop('description_en', None)
+        product_representation.pop('description_ar', None)
+
+
+
+
 
         representation['product'] = product_representation
         return representation        
