@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-05 17:20+0300\n"
+"POT-Creation-Date: 2024-05-12 22:40+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,6 +31,54 @@ msgstr "تمت الإضافة إلى قائمة الرغبات"
 msgid "Get Wishlist"
 msgstr "الحصول على قائمة الرغبات"
 
+#: .\store\models.py:275
+msgid "Paid"
+msgstr "مدفوع"
+
+#: .\store\models.py:276 .\store\models.py:288
+msgid "Pending"
+msgstr "قيد الانتظار"
+
+#: .\store\models.py:277
+msgid "Processing"
+msgstr "قيد المعالجة"
+
+#: .\store\models.py:278 .\store\models.py:291
+msgid "Cancelled"
+msgstr "ملغاة"
+
+#: .\store\models.py:279
+msgid "Initiated"
+msgstr "بدأت"
+
+#: .\store\models.py:280
+msgid "Failed"
+msgstr "فشلت"
+
+#: .\store\models.py:281
+msgid "Refunding"
+msgstr "تعويض"
+
+#: .\store\models.py:282
+msgid "Refunded"
+msgstr "تم التعويض"
+
+#: .\store\models.py:283
+msgid "Unpaid"
+msgstr "غير مدفوعة"
+
+#: .\store\models.py:284
+msgid "Expired"
+msgstr "منتهية الصلاحية"
+
+#: .\store\models.py:289
+msgid "Fulfilled"
+msgstr "مؤدى"
+
+#: .\store\models.py:290
+msgid "Partially Fulfilled"
+msgstr "مؤدى جزئياً"
+
 #: .\store\views.py:327
 msgid "Cart Updated Successfully"
 msgstr "تم تحديث السلة بنجاح"
@@ -51,7 +99,7 @@ msgstr "تم إنشاء الطلب بنجاح"
 msgid "Phone number must start with \"01\"."
 msgstr "يجب أن يبدأ رقم الهاتف بـ \"01\"."
 
-#: .\userauths\serializer.py:94 .\userauths\views.py:219
+#: .\userauths\serializer.py:94 .\userauths\views.py:221
 msgid "Password does not match"
 msgstr "كلمة المرور غير متطابقة"
 
@@ -68,23 +116,23 @@ msgstr "بريد إلكتروني أو كلمة مرور غير صالحة"
 msgid "login successfully"
 msgstr "تم تسجيل الدخول بنجاح"
 
-#: .\userauths\views.py:133
+#: .\userauths\views.py:135
 msgid "User created successfully."
 msgstr "تم إنشاء المستخدم بنجاح."
 
-#: .\userauths\views.py:177
+#: .\userauths\views.py:179
 msgid "This Email isn't exist"
 msgstr "هذا البريد الإلكتروني غير موجود"
 
-#: .\userauths\views.py:204
+#: .\userauths\views.py:206
 msgid "Check Your Email"
 msgstr "تحقق من بريدك الإلكتروني"
 
-#: .\userauths\views.py:228
+#: .\userauths\views.py:230
 msgid "Password Changed Successfully"
 msgstr "تم تغيير كلمة المرور بنجاح"
 
-#: .\userauths\views.py:230
+#: .\userauths\views.py:232
 msgid "User Does Not Exists"
 msgstr "المستخدم غير موجود"
 
@@ -129,6 +177,30 @@ msgstr "تم تحديث السلة بنجاح"
 #| msgid "Cart Updated Successfully"
 msgid "Size have been updated successfully"
 msgstr "تم تحديث السلة بنجاح"
+
+#: .\vendor\views.py:948
+#, fuzzy
+#| msgid "Item deleted successfully."
+msgid "Size deleted successfully"
+msgstr "تم حذف العنصر بنجاح"
+
+#: .\vendor\views.py:991
+#, fuzzy
+#| msgid "Product deleted successfully"
+msgid "Color deleted successfully"
+msgstr "تم حذف المنتج بنجاح"
+
+#: .\vendor\views.py:1035
+#, fuzzy
+#| msgid "Cart Updated Successfully"
+msgid "Specification deleted successfully"
+msgstr "تم تحديث السلة بنجاح"
+
+#: .\vendor\views.py:1084
+#, fuzzy
+#| msgid "Item deleted successfully."
+msgid "Gallery deleted successfully"
+msgstr "تم حذف العنصر بنجاح"
 
 #: .\venv\Lib\site-packages\django\contrib\messages\apps.py:15
 msgid "Messages"

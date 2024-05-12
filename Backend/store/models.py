@@ -9,6 +9,7 @@ from django.db.models.signals import post_save
 from unidecode import unidecode
 import shortuuid
 import uuid
+from django.utils.translation import gettext_lazy as _
 
 
 # Create your models here.
@@ -249,26 +250,45 @@ class Cart(models.Model):
 
 
 class CartOrder(models.Model):
+    # PAYMENT_STATUS = (
+    # ("paid", "Paid"),
+    # ("pending", "Pending"),
+    # ("processing", "Processing"),
+    # ("cancelled", "Cancelled"),
+    # ("initiated", 'Initiated'),
+    # ("failed", 'failed'),
+    # ("refunding", 'refunding'),
+    # ("refunded", 'refunded'),
+    # ("unpaid", 'unpaid'),
+    # ("expired", 'expired'),
+    # )
+
+
+    # ORDER_STATUS = (
+    #     ("Pending", "Pending"),
+    #     ("Fulfilled", "Fulfilled"),
+    #     ("Partially Fulfilled", "Partially Fulfilled"),
+    #     ("Cancelled", "Cancelled"),
+        
+    #)
     PAYMENT_STATUS = (
-    ("paid", "Paid"),
-    ("pending", "Pending"),
-    ("processing", "Processing"),
-    ("cancelled", "Cancelled"),
-    ("initiated", 'Initiated'),
-    ("failed", 'failed'),
-    ("refunding", 'refunding'),
-    ("refunded", 'refunded'),
-    ("unpaid", 'unpaid'),
-    ("expired", 'expired'),
+        ("paid", _("Paid")),
+        ("pending", _("Pending")),
+        ("processing", _("Processing")),
+        ("cancelled", _("Cancelled")),
+        ("initiated", _('Initiated')),
+        ("failed", _('Failed')),
+        ("refunding", _('Refunding')),
+        ("refunded", _('Refunded')),
+        ("unpaid", _('Unpaid')),
+        ("expired", _('Expired')),
     )
 
-
     ORDER_STATUS = (
-        ("Pending", "Pending"),
-        ("Fulfilled", "Fulfilled"),
-        ("Partially Fulfilled", "Partially Fulfilled"),
-        ("Cancelled", "Cancelled"),
-        
+        ("Pending", _("Pending")),
+        ("Fulfilled", _("Fulfilled")),
+        ("Partially Fulfilled", _("Partially Fulfilled")),
+        ("Cancelled", _("Cancelled")),
     )
     vendor = models.ManyToManyField(Vendor, blank=True)
     buyer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="buyer", blank=True)
@@ -304,6 +324,12 @@ class CartOrder(models.Model):
     def __str__(self):
         return self.oid
     
+    def get_payment_status_display(self):
+        return dict(self.PAYMENT_STATUS)[self.payment_status]
+
+    def get_order_status_display(self):
+        return dict(self.ORDER_STATUS)[self.order_status]
+    
     def orderitem(self):
         return CartOrderItem.objects.filter(order=self)
 
@@ -337,6 +363,7 @@ class CartOrderItem(models.Model):
 
     def __str__(self):
         return self.oid
+    
     
 
 

@@ -97,6 +97,10 @@ class OrdersAPIView(generics.ListAPIView):
         vendor = Vendor.objects.get(id=vendor_id)
         orders = CartOrder.objects.filter(vendor=vendor, payment_status="paid")
         return orders
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context 
     
 class OrderDetailAPIView(generics.RetrieveAPIView):
     serializer_class = CartOrderSerializer
@@ -108,6 +112,11 @@ class OrderDetailAPIView(generics.RetrieveAPIView):
         vendor = Vendor.objects.get(id=vendor_id)
         
         return CartOrder.objects.get(vendor=vendor, oid=order_oid) 
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context 
 
 
 class RevenueAPIView(generics.ListAPIView):
