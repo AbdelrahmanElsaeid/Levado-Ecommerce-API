@@ -343,68 +343,60 @@ class CartOrderSerializer(serializers.ModelSerializer):
             self.Meta.depth = 0
         else:
             self.Meta.depth = 3
+            
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         request = self.context.get('request')
 
         # Translate product title if available
-# product_representation.pop('price_EGP', None)
-#         product_representation.pop('price_AED', None)
+        for item in data['orderitem']:
+        # Translate category name if available
+            if 'product' in item and 'category' in item['product']:
+                category = item['product']['category']
+                if request:
+                    lang_code = request.LANGUAGE_CODE
+                    if lang_code == 'ar' and 'title_ar' in category:
+                        category['title'] = category['title_ar']
+                    elif lang_code == 'en' and 'title_en' in category:
+                        category['title'] = category['title_en']
+                    category.pop('title_en')  
+                    category.pop('title_ar')    
 
-
-#         # Remove desc and title fields
-#         product_representation.pop('title_en', None)
-#         product_representation.pop('title_ar', None)
-#         product_representation.pop('description_en', None)
-#         product_representation.pop('description_ar', None)
-
-        if 'product' in data['orderitem'][0]:
-
-            product = data['orderitem'][0]['product']
-
-            if 'title_ar' in product and request and request.LANGUAGE_CODE == 'ar':
-                product['title'] = product['title_ar']
-        
-
-            elif 'title_en' in product and request and request.LANGUAGE_CODE == 'en':
-                product['title'] = product['title_en']
-            product.pop('title_en')
-            product.pop('title_ar')
+            # Translate brand name if available
+            if 'product' in item and 'brand' in item['product']:
+                brand = item['product']['brand']
+                if request:
+                    lang_code = request.LANGUAGE_CODE
+                    if lang_code == 'ar' and 'title_ar' in brand:
+                        brand['title'] = brand['title_ar']
+                    elif lang_code == 'en' and 'title_en' in brand:
+                        brand['title'] = brand['title_en']
+                    brand.pop('title_en')  
+                    brand.pop('title_ar')     
             
+            # Translate product title and description if available
+            if 'product' in item:
+                product = item['product']
+                if request:
+                    lang_code = request.LANGUAGE_CODE
+                    if lang_code == 'ar' and 'title_ar' in product:
+                        product['title'] = product['title_ar']
+                    elif lang_code == 'en' and 'title_en' in product:
+                        product['title'] = product['title_en']
+
+                    product.pop('title_en')
+                    product.pop('title_ar')    
+                    if lang_code == 'ar' and 'description_ar' in product:
+                        product['description'] = product['description_ar']
+                    elif lang_code == 'en' and 'description_en' in product:
+                        product['description'] = product['description_en']
+
+                    product.pop('description_ar')
+                    product.pop('description_en')    
 
 
-            # Translate product description if available
-            if 'description_ar' in product and request and request.LANGUAGE_CODE == 'ar':
-                product['description'] = product['description_ar']
-            elif 'description_en' in product and request and request.LANGUAGE_CODE == 'en':
-                product['description'] = product['description_en']
 
-            product.pop('description_ar')
-            product.pop('description_en')    
-
-        
-        #Translate category name if available
-        if 'product' in data['orderitem'][0] and 'category' in data['orderitem'][0]['product']:
-            category = data['orderitem'][0]['product']['category']
-            if request and request.LANGUAGE_CODE == 'ar' and 'title_ar' in category:
-                category['title'] = category['title_ar']
-            elif request and request.LANGUAGE_CODE == 'en' and 'title_en' in category:
-                category['title'] = category['title_en']
-
-            category.pop('title_en')  
-            category.pop('title_ar')       
-
-        # Translate brand name if available
-        if 'product' in data['orderitem'][0] and 'brand' in data['orderitem'][0]['product']:
-            brand = data['orderitem'][0]['product']['brand']
-            if request and request.LANGUAGE_CODE == 'ar' and 'title_ar' in brand:
-                brand['title'] = brand['title_ar']
-            elif request and request.LANGUAGE_CODE == 'en' and 'title_en' in brand:
-                brand['title'] = brand['title_en']
-
-            brand.pop('title_en')  
-            brand.pop('title_ar')     
 
         return data
    
