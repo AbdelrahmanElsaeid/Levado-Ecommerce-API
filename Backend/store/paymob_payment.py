@@ -250,7 +250,7 @@ class PaymobCallbackView(APIView):
     
                 
                     #return Response({"message":"Payment Successfull"})
-                    redirect_url = 'http://localhost:5173/'
+                    redirect_url = 'http://localhost:4200/payment-success/'
                     return HttpResponseRedirect(redirect_url)
                 else:
                     return Response({"message":"Already Paid"})
