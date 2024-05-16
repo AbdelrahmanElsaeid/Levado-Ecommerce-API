@@ -250,21 +250,25 @@ class PaymobCallbackView(APIView):
     
                 
                     #return Response({"message":"Payment Successfull"})
-                    redirect_url = 'http://localhost:4200/payment-success/'
+                    redirect_url = 'http://localhost:4200/payment/success/'
                     return HttpResponseRedirect(redirect_url)
                 else:
                     return Response({"message":"Already Paid"})
 
             elif success == "false":
-                return Response({"message":"Your Invoice is Unpaid"}) 
-            # elif session.payment_status == "cancelled":
-            #     return Response({"message":"Your Invoice was canceled"})
+                #return Response({"message":"Your Invoice is Unpaid"})
+                redirect_url = 'http://localhost:4200/payment/fail/'
+                return HttpResponseRedirect(redirect_url) 
             else:
-                return Response({"message":"An Error Occured, Try Again..."})                 
+                #return Response({"message":"An Error Occured, Try Again..."}) 
+                redirect_url = 'http://localhost:4200/payment/fail/'
+                return HttpResponseRedirect(redirect_url)                
         
         else:
-            print("Received HMAC:", received_hmac)
-            return Response("not secure")
+            #print("Received HMAC:", received_hmac)
+            #return Response("not secure")
+            redirect_url = 'http://localhost:4200/payment/fail/'
+            return HttpResponseRedirect(redirect_url)
 
 
 
