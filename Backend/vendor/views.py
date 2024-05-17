@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from .models import Vendor
-from store.serializer import SummarySerializer, ProductSerializer,CartOrderItemSerializer,CartOrderSerializer, EarningSerializer, ReviewSerializer,CouponSerializer,CouponSummarySerializer,NotificationSerializer,NotificationSummarySerializer,VendorSerializer, ColorSerializer,SpecificationSerializer,SizeSerializer,GallerySerializer,ProductAddSerializer,ColorAddSerializer,SizeAddSerializer,SpecificationAddSerializer,ProductListSerializer,ProductVendorListSerializer,ColorUpdateSerializer,SizeUpdateSerializer,SpecificationUpdateSerializer
+from store.serializer import SummarySerializer, ProductSerializer,CartOrderItemSerializer,CartOrderSerializer, EarningSerializer, ReviewSerializer,CouponSerializer,CouponSummarySerializer,NotificationSerializer,NotificationSummarySerializer,VendorSerializer, ColorSerializer,SpecificationSerializer,SizeSerializer,GallerySerializer,ProductAddSerializer,ColorAddSerializer,SizeAddSerializer,SpecificationAddSerializer,ProductListSerializer,ProductVendorListSerializer,ColorUpdateSerializer,SizeUpdateSerializer,SpecificationUpdateSerializer,CartOrderItemVendorSerializer, CombinedTotalsSerializer
 from django.shortcuts import render,redirect
 from store.models import Category,Product,Cart,Tax,CartOrder,CartOrderItem,Coupon,Notification,Review,Gallery,Color,Size,Specification
 from rest_framework import generics,status
@@ -101,22 +101,57 @@ class OrdersAPIView(generics.ListAPIView):
         context = super().get_serializer_context()
         context['request'] = self.request
         return context 
-    
-class OrderDetailAPIView(generics.RetrieveAPIView):
-    serializer_class = CartOrderSerializer
+
+
+class OrderDetailAPIView(generics.ListAPIView):
+    serializer_class = CartOrderItemVendorSerializer
     permission_classes = [AllowAny,]
 
-    def get_object(self):
+    def get_queryset(self):
         vendor_id = self.kwargs['vendor_id']
         order_oid = self.kwargs['order_oid']
         vendor = Vendor.objects.get(id=vendor_id)
+
+        order = CartOrder.objects.get(vendor=vendor, oid=order_oid)
+
+        querset = CartOrderItem.objects.filter(vendor=vendor, order=order)
         
-        return CartOrder.objects.get(vendor=vendor, oid=order_oid) 
+        return querset
     
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['request'] = self.request
+        context['queryset'] = self.get_queryset()
         return context 
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        # Calculate combined totals
+        combined_totals = {
+            'subtotal': sum(float(item.sub_total) for item in queryset),
+            'total': sum(float(item.total) for item in queryset),
+            'shipping_amount': sum(float(item.shipping_amount) for item in queryset),
+            'service_fee': sum(float(item.service_fee) for item in queryset),
+            'tax_fee': sum(float(item.tax_fee) for item in queryset),
+            'initial_total': sum(float(item.initial_total) for item in queryset),
+            'saved': sum(float(item.saved) for item in queryset),
+        }
+
+        # Serialize queryset and combined_totals
+        serializer = self.get_serializer(queryset, many=True)
+        combined_totals_serializer = CombinedTotalsSerializer(combined_totals)
+
+        # Create response data
+        data = {
+            'orderitem': serializer.data,
+            'vendor_total': combined_totals_serializer.data
+        }
+
+        return Response(data)
+
+
+
 
 
 class RevenueAPIView(generics.ListAPIView):

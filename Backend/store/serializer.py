@@ -893,3 +893,97 @@ class ProductVendorListSerializer(serializers.ModelSerializer):
     #         self.Meta.depth = 0
     #     else:
     #         self.Meta.depth = 3
+
+
+
+
+
+
+
+
+
+class CartOrderItemVendorSerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = CartOrderItem
+        fields = '__all__'
+    
+    def __init__(self, *args, **kwargs):
+        super(CartOrderItemVendorSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request and request.method == 'POST':
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
+
+        
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        # Access request from serializer context
+        request = self.context.get('request')
+        queryset = self.context.get('queryset')
+
+        if request:
+            # Translate product title and description if available
+            if 'product' in representation:
+                product = representation['product']
+                lang_code = request.LANGUAGE_CODE
+
+                if lang_code == 'ar' and 'title_ar' in product:
+                    product['title'] = product['title_ar']
+                elif lang_code == 'en' and 'title_en' in product:
+                    product['title'] = product['title_en']
+
+                product.pop('title_en', None)
+                product.pop('title_ar', None)
+
+                if lang_code == 'ar' and 'description_ar' in product:
+                    product['description'] = product['description_ar']
+                elif lang_code == 'en' and 'description_en' in product:
+                    product['description'] = product['description_en']
+
+                product.pop('description_ar', None)
+                product.pop('description_en', None)
+
+                # Translate category title
+                if 'category' in product:
+                    category = product['category']
+
+                    if lang_code == 'ar' and 'title_ar' in category:
+                        category['title'] = category['title_ar']
+                    elif lang_code == 'en' and 'title_en' in category:
+                        category['title'] = category['title_en']
+
+                    category.pop('title_en', None)
+                    category.pop('title_ar', None)
+
+                # Translate brand name
+                if 'brand' in product:
+                    brand = product['brand']
+
+                    if lang_code == 'ar' and 'title_ar' in brand:
+                        brand['title'] = brand['title_ar']
+                    elif lang_code == 'en' and 'title_en' in brand:
+                        brand['title'] = brand['title_en']
+
+                    brand.pop('title_en', None)
+                    brand.pop('title_ar', None)
+
+          
+
+        return representation
+  
+
+
+
+class CombinedTotalsSerializer(serializers.Serializer):
+    subtotal = serializers.FloatField()
+    total = serializers.FloatField()
+    shipping_amount = serializers.FloatField()
+    service_fee = serializers.FloatField()
+    tax_fee = serializers.FloatField()
+    initial_total = serializers.FloatField()
+    saved = serializers.FloatField()
