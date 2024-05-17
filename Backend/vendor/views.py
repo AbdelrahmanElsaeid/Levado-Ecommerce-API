@@ -136,6 +136,7 @@ class OrderDetailAPIView(generics.ListAPIView):
             'tax_fee': sum(float(item.tax_fee) for item in queryset),
             'initial_total': sum(float(item.initial_total) for item in queryset),
             'saved': sum(float(item.saved) for item in queryset),
+            
         }
 
         # Serialize queryset and combined_totals
