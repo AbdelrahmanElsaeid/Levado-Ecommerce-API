@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from .models import Vendor
-from store.serializer import SummarySerializer, ProductSerializer,CartOrderItemSerializer,CartOrderSerializer, EarningSerializer, ReviewSerializer,CouponSerializer,CouponSummarySerializer,NotificationSerializer,NotificationSummarySerializer,VendorSerializer, ColorSerializer,SpecificationSerializer,SizeSerializer,GallerySerializer,ProductAddSerializer,ColorAddSerializer,SizeAddSerializer,SpecificationAddSerializer,ProductListSerializer,ProductVendorListSerializer,ColorUpdateSerializer,SizeUpdateSerializer,SpecificationUpdateSerializer,CartOrderItemVendorSerializer, CombinedTotalsSerializer
+from store.serializer import SummarySerializer, ProductSerializer,CartOrderItemSerializer,CartOrderSerializer, EarningSerializer, ReviewSerializer,CouponSerializer,CouponSummarySerializer,NotificationSerializer,NotificationSummarySerializer,VendorSerializer, ColorSerializer,SpecificationSerializer,SizeSerializer,GallerySerializer,ProductAddSerializer,ColorAddSerializer,SizeAddSerializer,SpecificationAddSerializer,ProductListSerializer,ProductVendorListSerializer,ColorUpdateSerializer,SizeUpdateSerializer,SpecificationUpdateSerializer,CartOrderItemVendorSerializer, CombinedTotalsSerializer, CartOrderVendorAllOrdersSerializer
 from django.shortcuts import render,redirect
 from store.models import Category,Product,Cart,Tax,CartOrder,CartOrderItem,Coupon,Notification,Review,Gallery,Color,Size,Specification
 from rest_framework import generics,status
@@ -89,7 +89,7 @@ class ProductsAPIView(generics.ListAPIView):
 
 
 class OrdersAPIView(generics.ListAPIView):
-    serializer_class = CartOrderSerializer
+    serializer_class = CartOrderVendorAllOrdersSerializer
     permission_classes = (AllowAny,)
 
     def get_queryset(self):
@@ -100,7 +100,13 @@ class OrdersAPIView(generics.ListAPIView):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['request'] = self.request
+        vendor_id = self.kwargs['vendor_id']
+        context['vendor_id'] = vendor_id
         return context 
+    
+    
+
+
 
 
 class OrderDetailAPIView(generics.ListAPIView):

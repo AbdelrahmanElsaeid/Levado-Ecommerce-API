@@ -343,6 +343,8 @@ class CartOrderSerializer(serializers.ModelSerializer):
             self.Meta.depth = 0
         else:
             self.Meta.depth = 3
+
+          
             
 
     def to_representation(self, instance):
@@ -987,3 +989,93 @@ class CombinedTotalsSerializer(serializers.Serializer):
     tax_fee = serializers.FloatField()
     initial_total = serializers.FloatField()
     saved = serializers.FloatField()
+
+
+
+
+
+
+
+
+
+class CartOrderVendorAllOrdersSerializer(serializers.ModelSerializer):
+    orderitem = CartOrderItemSerializer(many=True, read_only=True)
+    payment_status = serializers.CharField(source='get_payment_status_display')
+    order_status = serializers.CharField(source='get_order_status_display')
+    vendor_total = serializers.SerializerMethodField()  
+
+    class Meta:
+        model = CartOrder
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(CartOrderVendorAllOrdersSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request and request.method == 'POST':
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
+
+    def get_vendor_total(self, instance):
+        """
+        Calculate and return the total amount for the specific vendor in the order.
+        """
+        vendor_id = self.context.get('vendor_id')  # Get vendor_id from serializer context
+        order_items = instance.orderitem.all()  # Get all order items for the order
+
+        vendor_total = sum(item.total for item in order_items )  # Calculate total for the specific vendor
+        return vendor_total        
+            
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+
+        # Translate product title if available
+        for item in data['orderitem']:
+        # Translate category name if available
+            if 'product' in item and 'category' in item['product']:
+                category = item['product']['category']
+                if request:
+                    lang_code = request.LANGUAGE_CODE
+                    if lang_code == 'ar' and 'title_ar' in category:
+                        category['title'] = category['title_ar']
+                    elif lang_code == 'en' and 'title_en' in category:
+                        category['title'] = category['title_en']
+                    category.pop('title_en')  
+                    category.pop('title_ar')    
+
+            # Translate brand name if available
+            if 'product' in item and 'brand' in item['product']:
+                brand = item['product']['brand']
+                if request:
+                    lang_code = request.LANGUAGE_CODE
+                    if lang_code == 'ar' and 'title_ar' in brand:
+                        brand['title'] = brand['title_ar']
+                    elif lang_code == 'en' and 'title_en' in brand:
+                        brand['title'] = brand['title_en']
+                    brand.pop('title_en')  
+                    brand.pop('title_ar')     
+            
+            # Translate product title and description if available
+            if 'product' in item:
+                product = item['product']
+                if request:
+                    lang_code = request.LANGUAGE_CODE
+                    if lang_code == 'ar' and 'title_ar' in product:
+                        product['title'] = product['title_ar']
+                    elif lang_code == 'en' and 'title_en' in product:
+                        product['title'] = product['title_en']
+
+                    product.pop('title_en')
+                    product.pop('title_ar')    
+                    if lang_code == 'ar' and 'description_ar' in product:
+                        product['description'] = product['description_ar']
+                    elif lang_code == 'en' and 'description_en' in product:
+                        product['description'] = product['description_en']
+
+                    product.pop('description_ar')
+                    product.pop('description_en')    
+
+        return data
+   
